@@ -23,7 +23,7 @@ export const Cta = () => {
           <Button
             size="lg"
             variant="outline"
-            className="border-white text-white hover:bg-white/10"
+            className="border-white text-white hover:bg-white hover:text-primary" // Updated hover styles
           >
             <Compass className="mr-2 h-5 w-5" />
             Explore Features
