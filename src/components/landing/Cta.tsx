@@ -23,7 +23,7 @@ export const Cta = () => {
           <Button
             size="lg"
             variant="outline"
-            className="bg-primary border-white text-white hover:bg-white hover:text-primary" // Added bg-primary for non-hovered state
+            className="bg-transparent border-white text-white hover:bg-white hover:text-primary" // Changed bg-primary to bg-transparent
           >
             <Compass className="mr-2 h-5 w-5" />
             Explore Features
