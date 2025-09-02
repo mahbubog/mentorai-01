@@ -62,7 +62,7 @@ export function VerificationForm({ email }: { email: string }) {
               <FormItem>
                 <FormLabel className="sr-only">One-Time Password</FormLabel>
                 <FormControl>
-                  <InputOTP maxLength={6} {...field}>
+                  <InputOTP maxLength={6} {...field} containerClassName="justify-center"> {/* এখানে পরিবর্তন করা হয়েছে */}
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />
