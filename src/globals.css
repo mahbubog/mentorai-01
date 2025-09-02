@@ -13,10 +13,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 240 80% 60%; /* Adjusted primary color to match screenshot */
+    --primary: 258 90% 66%; /* Adjusted primary color to precisely match screenshot */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 258 90% 66%;
+    --secondary: 240 80% 60%; /* Swapped with old primary to keep a distinct secondary */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
@@ -45,10 +45,10 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 240 80% 60%; /* Adjusted primary color to match screenshot */
+    --primary: 258 90% 66%; /* Adjusted primary color to precisely match screenshot */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 258 90% 66%;
+    --secondary: 240 80% 60%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217 33% 17%;
