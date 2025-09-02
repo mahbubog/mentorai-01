@@ -29,7 +29,11 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-export function SignUpForm() {
+interface SignUpFormProps {
+  onSignUpSuccess: (email: string) => void;
+}
+
+export function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,11 +45,12 @@ export function SignUpForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // NOTE: This is a placeholder for Step 1 of registration.
+    // দ্রষ্টব্য: এটি রেজিস্ট্রেশনের প্রথম ধাপের জন্য একটি প্লেসহোল্ডার।
     console.log(values);
-    toast.success("Account Created (Placeholder)", {
-      description: "Next, you would verify your email.",
+    toast.success("Verification Code Sent (Placeholder)", {
+      description: `A code has been sent to ${values.email}.`,
     });
+    onSignUpSuccess(values.email);
   }
 
   return (
