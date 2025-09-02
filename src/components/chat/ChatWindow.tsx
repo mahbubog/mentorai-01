@@ -4,31 +4,54 @@ import { ChatInput } from "./ChatInput";
 import { ChatMessages } from "./ChatMessages";
 import { useState } from "react";
 import { Message } from "./ChatMessage";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ChatWindow() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
       content,
     };
 
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setIsLoading(true);
 
-    // Simulate assistant response
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke("gemini-chat", {
+        body: { messages: newMessages },
+      });
+
+      if (error) {
+        throw new Error(`Function invocation failed: ${error.message}`);
+      }
+      
+      if (data.error) {
+        throw new Error(`Gemini API Error: ${data.error}`);
+      }
+
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: `This is a simulated response to: "${content}"`,
+        content: data.content,
       };
       setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+
+    } catch (err) {
+      console.error(err);
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Sorry, I couldn't get a response. Please check the console for errors.",
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
