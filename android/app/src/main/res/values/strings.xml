@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">wandering-kookaburra-wag</string>
+    <string name="title_activity_main">wandering-kookaburra-wag</string>
+    <string name="package_name">com.example.wanderingkookaburrawag</string>
+    <string name="custom_url_scheme">com.example.wanderingkookaburrawag</string>
+</resources>
