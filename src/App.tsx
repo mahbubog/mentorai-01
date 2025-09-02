@@ -13,6 +13,7 @@ import SignUpPage from "./pages/SignUp";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import ProfileSetupPage from "./pages/ProfileSetup";
 import OnboardingPage from "./pages/Onboarding";
+import ChatPage from "./pages/ChatPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/profile-setup" element={<ProfileSetupPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/chat" element={<ChatPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -49,7 +49,7 @@ const Welcome = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={() => navigate("/")}>
+          <Button className="w-full" onClick={() => navigate("/chat")}>
             Let's Get Started
           </Button>
         </CardFooter>
