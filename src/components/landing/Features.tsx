@@ -5,64 +5,75 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  BookOpen,
+  BookOpen, // Not used, but keeping for reference if needed
   Briefcase,
   Download,
   FileText,
   FileUp,
   History,
-  MessageSquarePlus,
-  Users,
+  MessageSquarePlus, // Not used, but keeping for reference if needed
+  Users, // Not used, but keeping for reference if needed
+  GraduationCap, // New icon
+  UserCog, // New icon
+  Handshake, // New icon
 } from "lucide-react";
 
 const features = [
   {
-    icon: <BookOpen className="h-6 w-6" />,
+    icon: <GraduationCap className="h-6 w-6" />,
     title: "Academic Q&A",
     description:
       "Get detailed explanations for complex academic concepts across all subjects.",
+    iconBg: "bg-purple-100 text-purple-600", // Matches screenshot
   },
   {
     icon: <Briefcase className="h-6 w-6" />,
     title: "Career Guidance",
     description:
       "Professional insights and advice to help you navigate your career path.",
+    iconBg: "bg-purple-100 text-purple-600", // Matches screenshot
   },
   {
     icon: <FileUp className="h-6 w-6" />,
     title: "Multi-format Upload",
     description:
       "Upload PDFs, Images, documents, and Excel files for instant analysis.",
+    iconBg: "bg-cyan-100 text-cyan-600", // Matches screenshot
   },
   {
-    icon: <MessageSquarePlus className="h-6 w-6" />,
+    icon: <UserCog className="h-6 w-6" />, // Changed icon
     title: "Personalized Answers",
     description:
       "Contextual follow-ups and personalized responses based on your needs.",
+    iconBg: "bg-green-100 text-green-600", // Matches screenshot
   },
   {
     icon: <Download className="h-6 w-6" />,
     title: "Save & Export",
     description:
       "Export your conversations as PDF or text files for future reference.",
+    iconBg: "bg-yellow-100 text-yellow-600", // Matches screenshot
   },
   {
     icon: <FileText className="h-6 w-6" />,
     title: "Resume Optimization",
     description:
       "AI-powered CV analysis and optimization for better job prospects.",
+    iconBg: "bg-red-100 text-red-600", // Matches screenshot
   },
   {
-    icon: <Users className="h-6 w-6" />,
+    icon: <Handshake className="h-6 w-6" />, // Changed icon
     title: "Interview Prep",
     description:
       "Practice interviews with AI feedback and professional tips.",
+    iconBg: "bg-blue-100 text-blue-600", // Matches screenshot
   },
   {
     icon: <History className="h-6 w-6" />,
     title: "History & Files",
     description:
       "Organized conversation history and file management system.",
+    iconBg: "bg-purple-100 text-purple-600", // Matches screenshot
   },
 ];
 
@@ -83,10 +94,10 @@ export const Features = () => {
           {features.map((feature) => (
             <Card
               key={feature.title}
-              className="text-left bg-gray-50/50 hover:shadow-lg transition-shadow rounded-lg"
+              className="text-left bg-white shadow-sm hover:shadow-md transition-shadow rounded-xl" // Updated styling
             >
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                <div className={`w-12 h-12 ${feature.iconBg} rounded-lg flex items-center justify-center`}>
                   {feature.icon}
                 </div>
               </CardHeader>
