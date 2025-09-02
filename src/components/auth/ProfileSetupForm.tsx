@@ -66,7 +66,7 @@ export function ProfileSetupForm() {
     toast.success("Profile setup complete!");
     // Next step: Redirect to onboarding/welcome, then to the main chat interface.
     // For now, we'll navigate to the homepage.
-    navigate("/"); 
+    navigate("/onboarding"); 
   }
 
   return (
@@ -195,7 +195,7 @@ export function ProfileSetupForm() {
 
           <div className="flex flex-col gap-y-4">
             <Button type="submit" className="w-full">Finish Setup</Button>
-            <Button variant="ghost" className="w-full" onClick={() => navigate('/')}>Skip for now</Button>
+            <Button variant="ghost" className="w-full" onClick={() => navigate('/onboarding')}>Skip for now</Button>
           </div>
         </form>
       </Form>
