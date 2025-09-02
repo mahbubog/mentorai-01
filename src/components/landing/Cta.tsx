@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Rocket, Compass } from "lucide-react";
+import { Link } from "react-router-dom"; // Import Link
 
 export const Cta = () => {
   return (
@@ -16,14 +17,17 @@ export const Cta = () => {
           <Button
             size="lg"
             className="bg-white text-primary hover:bg-gray-100"
+            asChild // Add asChild to pass props to the Link component
           >
-            <Rocket className="mr-2 h-5 w-5" />
-            Start for Free
+            <Link to="/login"> {/* Wrap button content with Link */}
+              <Rocket className="mr-2 h-5 w-5" />
+              Start for Free
+            </Link>
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="bg-transparent border-white text-white hover:bg-white hover:text-primary" // Changed bg-primary to bg-transparent
+            className="bg-transparent border-white text-white hover:bg-white hover:text-primary"
           >
             <Compass className="mr-2 h-5 w-5" />
             Explore Features
