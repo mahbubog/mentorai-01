@@ -1,22 +1,19 @@
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  BookOpen, // Not used, but keeping for reference if needed
   Briefcase,
   Download,
   FileText,
   FileUp,
   History,
-  MessageSquarePlus, // Not used, but keeping for reference if needed
-  Users, // Not used, but keeping for reference if needed
   GraduationCap, // New icon
   UserCog, // New icon
   Handshake, // New icon
 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const features = [
   {
