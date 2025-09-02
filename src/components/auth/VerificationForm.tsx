@@ -38,7 +38,7 @@ export function VerificationForm({ email }: { email: string }) {
   function onSubmit(data: z.infer<typeof formSchema>) {
     console.log(data);
     toast.success("Your account is verified!");
-    navigate("/login");
+    navigate("/profile-setup");
   }
 
   const handleResendCode = () => {
