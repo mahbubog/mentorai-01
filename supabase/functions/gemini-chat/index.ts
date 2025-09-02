@@ -1,23 +1,27 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+/// <reference lib="deno.ns" />
+/// <reference types="https://deno.land/std@0.190.0/http/server.d.ts" />
+/// <reference types="https://esm.sh/@google/generative-ai@0.15.0/dist/index.d.ts" />
+
+import { serve, Request } from "https://deno.land/std@0.190.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.15.0";
 
-// CORS হেডারগুলো সেট করা হচ্ছে যাতে ব্রাউজার থেকে ফাংশনটি কল করা যায়
+// CORS হেডারগুলো সেট করা হচ্ছে যাতে ব্রাউজার থেকে ফাংশনটি কল করা যায়
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // OPTIONS অনুরোধ হ্যান্ডেল করা হচ্ছে (CORS preflight)
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // অনুরোধের বডি থেকে বার্তাগুলো পড়া হচ্ছে
+    // অনুরোধের বডি থেকে বার্তাগুলো পড়া হচ্ছে
     const { messages } = await req.json();
 
-    // Supabase secrets থেকে Gemini API কী পড়া হচ্ছে
+    // Supabase secrets থেকে Gemini API কী পড়া হচ্ছে
     const API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!API_KEY) {
       throw new Error("Gemini API key is not set in environment variables.");
@@ -45,9 +49,13 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    let errorMessage = "An unknown error occurred.";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: 200,
     });
   }
 });
