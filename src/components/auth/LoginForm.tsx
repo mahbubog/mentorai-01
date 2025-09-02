@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { Chrome } from "lucide-react";
 
 const formSchema = z.object({
@@ -31,13 +31,31 @@ export function LoginForm() {
     },
   });
 
+  const navigate = useNavigate(); // Initialize useNavigate
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     // NOTE: This is a placeholder for authentication logic.
     console.log(values);
     toast.success("Logged In (Placeholder)", {
       description: "You have successfully logged in.",
     });
+    // In a real app, you would redirect to a dashboard or main app page here
+    navigate("/");
   }
+
+  const handleSocialLogin = (provider: string) => {
+    toast.info(`Login with ${provider} (Placeholder)`, {
+      description: `This would initiate an OAuth flow, typically handled by a service like Supabase.`,
+    });
+    // In a real app, you would initiate the OAuth flow here
+  };
+
+  const handleGuestAccess = () => {
+    toast.info("Continuing as Guest", {
+      description: "You have limited access to the application.",
+    });
+    navigate("/"); // Redirect to home page for guest access
+  };
 
   return (
     <div className="space-y-6">
@@ -93,10 +111,10 @@ export function LoginForm() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => handleSocialLogin("Google")}>
           <Chrome className="mr-2 h-4 w-4" /> Google
         </Button>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => handleSocialLogin("LinkedIn")}>
           <svg
             role="img"
             viewBox="0 0 24 24"
@@ -109,7 +127,7 @@ export function LoginForm() {
         </Button>
       </div>
       <div className="text-center">
-        <Button variant="link" className="text-muted-foreground">
+        <Button variant="link" className="text-muted-foreground" onClick={handleGuestAccess}>
           Continue as Guest
         </Button>
       </div>
