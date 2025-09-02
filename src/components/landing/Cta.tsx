@@ -3,7 +3,7 @@ import { Rocket, Compass } from "lucide-react";
 
 export const Cta = () => {
   return (
-    <section className="py-20 md:py-24 bg-gradient-to-r from-primary to-secondary text-primary-foreground">
+    <section className="py-20 md:py-24 bg-primary text-primary-foreground"> {/* Changed background to solid primary */}
       <div className="container text-center">
         <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
           Start Your Journey Today
@@ -22,8 +22,7 @@ export const Cta = () => {
           </Button>
           <Button
             size="lg"
-            variant="outline"
-            className="border-white text-white hover:bg-white/10"
+            className="border border-primary text-primary bg-transparent hover:bg-primary/10" // Updated styling for outline button
           >
             <Compass className="mr-2 h-5 w-5" />
             Explore Features
