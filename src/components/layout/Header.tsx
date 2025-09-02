@@ -29,6 +29,12 @@ export const Header = () => {
           >
             About
           </Link>
+          <Link
+            to="/contact"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Contact
+          </Link>
         </nav>
         <div className="flex items-center gap-4">
           <Button variant="ghost">Login</Button>

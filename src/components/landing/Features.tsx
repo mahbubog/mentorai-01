@@ -17,74 +17,83 @@ import {
 
 const features = [
   {
-    icon: <BookOpen className="h-8 w-8 text-primary" />,
+    icon: <BookOpen className="h-6 w-6" />,
     title: "Academic Q&A",
     description:
-      "Get detailed explanations and step-by-step solutions for your academic questions.",
+      "Get detailed explanations for complex academic concepts across all subjects.",
   },
   {
-    icon: <Briefcase className="h-8 w-8 text-primary" />,
+    icon: <Briefcase className="h-6 w-6" />,
     title: "Career Guidance",
     description:
-      "Receive professional insights and guidance for your career path and job search.",
+      "Professional insights and advice to help you navigate your career path.",
   },
   {
-    icon: <FileUp className="h-8 w-8 text-primary" />,
+    icon: <FileUp className="h-6 w-6" />,
     title: "Multi-format Upload",
     description:
-      "Support for PDF, Image, DOC, and Excel files to get context-aware answers.",
+      "Upload PDFs, Images, documents, and Excel files for instant analysis.",
   },
   {
-    icon: <MessageSquarePlus className="h-8 w-8 text-primary" />,
-    title: "Personalized Follow-up",
+    icon: <MessageSquarePlus className="h-6 w-6" />,
+    title: "Personalized Answers",
     description:
-      "Contextual answers and personalized follow-up questions to deepen your understanding.",
+      "Contextual follow-ups and personalized responses based on your needs.",
   },
   {
-    icon: <Download className="h-8 w-8 text-primary" />,
+    icon: <Download className="h-6 w-6" />,
     title: "Save & Export",
     description:
-      "Save your important conversations and export them as PDF or Text files.",
+      "Export your conversations as PDF or text files for future reference.",
   },
   {
-    icon: <FileText className="h-8 w-8 text-primary" />,
-    title: "Resume/CV Optimization",
+    icon: <FileText className="h-6 w-6" />,
+    title: "Resume Optimization",
     description:
-      "Optimize your resume and CV with AI-powered suggestions to stand out.",
+      "AI-powered CV analysis and optimization for better job prospects.",
   },
   {
-    icon: <Users className="h-8 w-8 text-primary" />,
-    title: "Interview Preparation",
+    icon: <Users className="h-6 w-6" />,
+    title: "Interview Prep",
     description:
-      "Practice for interviews with AI-driven tips and mock interview sessions.",
+      "Practice interviews with AI feedback and professional tips.",
   },
   {
-    icon: <History className="h-8 w-8 text-primary" />,
-    title: "History & File Management",
+    icon: <History className="h-6 w-6" />,
+    title: "History & Files",
     description:
-      "Easily access your chat history and manage all your uploaded files in one place.",
+      "Organized conversation history and file management system.",
   },
 ];
 
 export const Features = () => {
   return (
-    <section id="features" className="py-20 md:py-32 bg-muted/50">
+    <section id="features" className="py-20 md:py-24 bg-white">
       <div className="container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-medium tracking-tight">
-            Powerful Features to Guide You
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            Powerful Features
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mt-4">
-            Everything you need for academic success and career readiness, all
-            in one place.
+            Everything you need to excel in your academic journey and career
+            development.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature) => (
-            <Card key={feature.title} className="text-left">
-              <CardHeader>{feature.icon}</CardHeader>
+            <Card
+              key={feature.title}
+              className="text-left bg-gray-50/50 hover:shadow-lg transition-shadow rounded-lg"
+            >
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
+                  {feature.icon}
+                </div>
+              </CardHeader>
               <CardContent>
-                <CardTitle className="mb-2 text-lg">{feature.title}</CardTitle>
+                <CardTitle className="mb-2 text-lg font-semibold">
+                  {feature.title}
+                </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {feature.description}
                 </p>
