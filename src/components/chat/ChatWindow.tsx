@@ -43,10 +43,11 @@ export function ChatWindow() {
 
     } catch (err) {
       console.error(err);
+      const errorContent = err instanceof Error ? err.message : "An unknown error occurred.";
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Sorry, I couldn't get a response. Please check the console for errors.",
+        content: `দুঃখিত, একটি ত্রুটি ঘটেছে: ${errorContent}. অনুগ্রহ করে নিশ্চিত করুন আপনার Gemini API কী Supabase-এ সঠিকভাবে সেট করা আছে।`,
       };
       setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
