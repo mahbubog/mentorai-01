@@ -164,4 +164,5 @@ const ChatWindow = ({ conversationId, conversationType = 'academic', onConversat
   );
 };
 
+export { ChatWindow };
 export default ChatWindow;
