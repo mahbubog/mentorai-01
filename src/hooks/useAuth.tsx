@@ -59,8 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      // First create the user account
-      const { data, error } = await supabase.auth.signUp({
+      // Create user account without triggering multiple emails
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -70,17 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
       
-      if (error) return { error };
-      
-      // Then send OTP for email verification
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false, // User already exists
-        },
-      });
-      
-      return { error: otpError };
+      return { error };
     } catch (error: any) {
       return { error };
     }
