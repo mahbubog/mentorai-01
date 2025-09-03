@@ -6,15 +6,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, User, Bell, Palette, Globe, Shield, HelpCircle } from "lucide-react";
+import { ArrowLeft, User, Bell, Palette } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+type UserRole = Database["public"]["Enums"]["user_role"];
+
+// Define an interface for preferences to ensure type safety
+interface UserPreferences {
+  tone: string;
+  language: string;
+  theme: string;
+  notifications: boolean;
+  [key: string]: Json | undefined; // Add index signature to make it compatible with Supabase's Json type
+}
 
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<{
+    name: string;
+    role: UserRole;
+    preferences: UserPreferences; // Use the new interface here
+  }>({
     name: "",
     role: "student",
     preferences: {
@@ -22,7 +37,7 @@ const Settings = () => {
       language: "en",
       theme: "system",
       notifications: true
-    } as any
+    }
   });
   const [loading, setLoading] = useState(false);
 
@@ -34,28 +49,40 @@ const Settings = () => {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
+      if (fetchError) {
+        console.error("Error fetching profile:", fetchError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profile settings.",
+        });
+      }
+
       if (data) {
+        // Ensure data.preferences is treated as UserPreferences or default
+        const loadedPreferences: UserPreferences = (data.preferences as unknown as UserPreferences) || { // Cast to unknown first, then to UserPreferences
+          tone: "academic",
+          language: "en",
+          theme: "system",
+          notifications: true
+        };
+
         setProfile({
           name: data.name,
           role: data.role,
-          preferences: data.preferences || {
-            tone: "academic",
-            language: "en",
-            theme: "system",
-            notifications: true
-          }
+          preferences: loadedPreferences
         });
       }
     };
 
     loadProfile();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleSave = async () => {
     setLoading(true);
@@ -133,15 +160,15 @@ const Settings = () => {
                 <Label htmlFor="role">Role</Label>
                 <Select
                   value={profile.role}
-                  onValueChange={(value) => setProfile({ ...profile, role: value })}
+                  onValueChange={(value: UserRole) => setProfile({ ...profile, role: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="teacher">Teacher</SelectItem>
-                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="job_seeker">Job Seeker</SelectItem>
+                    <SelectItem value="both">Both</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

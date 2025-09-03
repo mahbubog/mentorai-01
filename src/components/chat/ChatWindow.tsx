@@ -9,7 +9,7 @@ import { Message } from "./ChatMessage";
 import { nanoid } from "nanoid";
 
 interface ChatWindowProps {
-  conversationId?: string;
+  conversationId?: string | null; // Allow null or undefined
   conversationType?: 'academic' | 'career';
   onConversationCreated?: (id: string) => void;
 }

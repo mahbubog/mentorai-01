@@ -3,13 +3,11 @@
 import { Button } from "@/components/ui/button";
 import {
   MessageSquarePlus,
-  GraduationCap,
-  Briefcase,
   History,
   FileText,
   Settings,
-  HelpCircle,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";

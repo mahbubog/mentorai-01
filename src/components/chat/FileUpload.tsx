@@ -4,10 +4,10 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, File, X, FileText, Image, FileSpreadsheet } from "lucide-react";
+import { Upload, X, FileText, Image, FileSpreadsheet } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
 
 interface FileUploadProps {
   onFileUploaded?: (file: { id: string; name: string; url: string; type: string }) => void;
@@ -20,6 +20,8 @@ interface UploadedFile {
   type: string;
   size: number;
 }
+
+type FileType = Database["public"]["Enums"]["file_type"];
 
 export function FileUpload({ onFileUploaded }: FileUploadProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -107,7 +109,7 @@ export function FileUpload({ onFileUploaded }: FileUploadProps) {
       }, 200);
 
       // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: _uploadData, error: uploadError } = await supabase.storage
         .from('user-files')
         .upload(fileName, file);
 
@@ -123,22 +125,26 @@ export function FileUpload({ onFileUploaded }: FileUploadProps) {
         .getPublicUrl(fileName);
 
       // Determine file type
-      let fileType: 'document' | 'image' | 'spreadsheet' = 'document';
+      let fileType: FileType = 'doc';
       if (file.type.startsWith('image/')) {
         fileType = 'image';
+      } else if (file.type.includes('pdf')) {
+        fileType = 'pdf';
       } else if (file.type.includes('spreadsheet') || file.type.includes('excel')) {
-        fileType = 'spreadsheet';
+        fileType = 'excel';
       }
 
       // Save file record to database
       const { data: fileRecord, error: dbError } = await supabase
         .from('files')
-        .insert({
-          user_id: user.id,
-          file_name: file.name,
-          file_url: publicUrl,
-          file_type: fileType
-        })
+        .insert([
+          {
+            user_id: user.id,
+            file_name: file.name,
+            file_url: publicUrl,
+            file_type: fileType
+          }
+        ])
         .select()
         .single();
 

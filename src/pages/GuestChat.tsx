@@ -35,7 +35,7 @@ const GuestChat = () => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: getGuestResponse(messageContent, conversationType),
+        content: getGuestResponse(conversationType),
       };
 
       setMessages(prev => [...prev, aiResponse]);
@@ -63,7 +63,7 @@ const GuestChat = () => {
     }
   };
 
-  const getGuestResponse = (question: string, type: 'academic' | 'career'): string => {
+  const getGuestResponse = (type: 'academic' | 'career'): string => {
     const academicResponses = [
       "I'd be happy to help with your academic question! In the full version, I can provide detailed explanations, step-by-step solutions, and even analyze uploaded documents.",
       "This is a great academic question! With a full account, you'll get comprehensive answers with references, examples, and the ability to upload files for analysis.",

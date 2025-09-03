@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface Conversation {
   id: string;
@@ -18,7 +17,6 @@ const ChatLayout = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [conversationType, setConversationType] = useState<'academic' | 'career'>('academic');
-  const { toast } = useToast();
 
   // Load conversations on component mount
   useEffect(() => {
@@ -104,7 +102,7 @@ const ChatLayout = () => {
       </div>
       <div className="flex-1 min-w-0">
         <ChatWindow 
-          conversationId={activeConversation}
+          conversationId={activeConversation ?? undefined}
           conversationType={conversationType}
           onConversationCreated={handleConversationCreated}
         />

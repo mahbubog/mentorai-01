@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageSquare, BookOpen, Briefcase, Users, TrendingUp, Shield } from "lucide-react";
+import { MessageSquare, BookOpen, Briefcase } from "lucide-react";
+import { User } from "@supabase/supabase-js";
 
 const Index = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <Hero />
       
       {/* Enhanced Hero Section */}
       <section className="relative py-20 lg:py-32 bg-gradient-to-br from-primary/5 to-secondary/5">

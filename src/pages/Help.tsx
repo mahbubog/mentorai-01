@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, MessageCircle, Upload, Settings, FileText, HelpCircle, Mail } from "lucide-react";
+import { ArrowLeft, MessageCircle, Upload, Settings, FileText, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Help = () => {
