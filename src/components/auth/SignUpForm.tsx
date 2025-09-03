@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import PasswordStrength from "./PasswordStrength";
+import { useAuth } from "@/hooks/useAuth";
 
 const formSchema = z
   .object({
@@ -41,6 +42,8 @@ interface SignUpFormProps {
 export function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,12 +57,29 @@ export function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
 
   const password = form.watch("password");
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast.success("Verification Code Sent (Placeholder)", {
-      description: `A code has been sent to ${values.email}.`,
-    });
-    onSignUpSuccess(values.email);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
+    try {
+      const { error } = await signUp(values.email, values.password, values.fullName);
+      
+      if (error) {
+        if (error.message.includes('already registered')) {
+          toast.error("This email is already registered. Please sign in instead.");
+        } else {
+          toast.error(error.message || "Registration failed");
+        }
+        return;
+      }
+
+      toast.success("Verification email sent!", {
+        description: `Please check ${values.email} for a verification code.`,
+      });
+      onSignUpSuccess(values.email);
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -154,8 +174,8 @@ export function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full !mt-6">
-          Continue
+        <Button type="submit" className="w-full !mt-6" disabled={loading}>
+          {loading ? "Creating Account..." : "Continue"}
         </Button>
       </form>
     </Form>

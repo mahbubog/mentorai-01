@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const GoogleIcon = () => (
   <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4">
@@ -49,6 +50,10 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signIn, signInWithOAuth } = useAuth();
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,27 +63,43 @@ export function LoginForm() {
     },
   });
 
-  const navigate = useNavigate();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
+    try {
+      const { error } = await signIn(values.email, values.password);
+      
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error("Invalid email or password");
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error("Please check your email and verify your account first");
+        } else {
+          toast.error(error.message || "Login failed");
+        }
+        return;
+      }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast.success("Logged In (Placeholder)", {
-      description: "You have successfully logged in.",
-    });
-    navigate("/");
+      navigate("/chat");
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const handleSocialLogin = (provider: string) => {
-    toast.info(`Login with ${provider} (Placeholder)`, {
-      description: `This would initiate an OAuth flow.`,
-    });
+  const handleSocialLogin = async (provider: 'google' | 'linkedin_oidc') => {
+    try {
+      const { error } = await signInWithOAuth(provider);
+      if (error) {
+        toast.error(`Failed to login with ${provider}: ${error.message}`);
+      }
+    } catch (error: any) {
+      toast.error(`An error occurred during ${provider} login`);
+    }
   };
 
   const handleGuestAccess = () => {
-    toast.info("Continuing as Guest", {
-      description: "You have limited access to the application.",
-    });
-    navigate("/");
+    navigate("/guest-chat");
   };
 
   return (
@@ -154,8 +175,8 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </div>
-          <Button type="submit" className="w-full !mt-6">
-            Sign In
+          <Button type="submit" className="w-full !mt-6" disabled={loading}>
+            {loading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
       </Form>
@@ -172,15 +193,15 @@ export function LoginForm() {
       <div className="grid grid-cols-2 gap-4">
         <Button
           variant="outline"
-          onClick={() => handleSocialLogin("Google")}
-          className="hover:bg-background hover:text-foreground" // হোভার ইফেক্ট সরানো হয়েছে
+          onClick={() => handleSocialLogin("google")}
+          className="hover:bg-background hover:text-foreground"
         >
           <GoogleIcon /> Google
         </Button>
         <Button
           variant="outline"
-          onClick={() => handleSocialLogin("LinkedIn")}
-          className="hover:bg-background hover:text-foreground" // হোভার ইফেক্ট সরানো হয়েছে
+          onClick={() => handleSocialLogin("linkedin_oidc")}
+          className="hover:bg-background hover:text-foreground"
         >
           <svg
             role="img"

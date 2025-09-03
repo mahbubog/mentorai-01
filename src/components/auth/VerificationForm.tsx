@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 
 const formSchema = z.object({
   pin: z.string().min(6, {
@@ -28,6 +30,9 @@ const formSchema = z.object({
 
 export function VerificationForm({ email }: { email: string }) {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const { verifyOTP, resendOTP } = useAuth();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,16 +40,40 @@ export function VerificationForm({ email }: { email: string }) {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
-    toast.success("Your account is verified!");
-    navigate("/profile-setup");
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    setLoading(true);
+    try {
+      const { error } = await verifyOTP(email, data.pin);
+      
+      if (error) {
+        toast.error(error.message || "Verification failed");
+        return;
+      }
+
+      toast.success("Your account is verified!");
+      navigate("/profile-setup");
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const handleResendCode = () => {
-    toast.info("Verification Code Resent (Placeholder)", {
-      description: `A new code has been sent to ${email}.`,
-    });
+  const handleResendCode = async () => {
+    try {
+      const { error } = await resendOTP(email);
+      
+      if (error) {
+        toast.error(error.message || "Failed to resend code");
+        return;
+      }
+
+      toast.success("Verification code resent!", {
+        description: `A new code has been sent to ${email}.`,
+      });
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+    }
   };
 
   return (
@@ -78,8 +107,8 @@ export function VerificationForm({ email }: { email: string }) {
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Verify Account
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Verifying..." : "Verify Account"}
           </Button>
         </form>
       </Form>
