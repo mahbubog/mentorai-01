@@ -91,8 +91,8 @@ const ChatLayout = () => {
   };
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="min-h-screen w-full bg-background">
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="hidden lg:block">
+    <div className="flex h-screen w-full bg-background">
+      <div className="hidden lg:flex w-80 flex-shrink-0 border-r border-border">
         <Sidebar 
           conversations={conversations}
           activeConversation={activeConversation}
@@ -101,16 +101,15 @@ const ChatLayout = () => {
           onConversationSelect={handleConversationSelect}
           onTypeChange={handleTypeChange}
         />
-      </ResizablePanel>
-      <ResizableHandle withHandle className="hidden lg:flex" />
-      <ResizablePanel defaultSize={80}>
+      </div>
+      <div className="flex-1 min-w-0">
         <ChatWindow 
           conversationId={activeConversation}
           conversationType={conversationType}
           onConversationCreated={handleConversationCreated}
         />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+      </div>
+    </div>
   );
 };
 
