@@ -14,6 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ConversationType } from "./ConversationType";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Conversation {
   id: string;
@@ -116,16 +117,19 @@ export function Sidebar({
           <FileText className="mr-2 h-4 w-4" />
           Uploaded Files
         </Button>
-        <Button variant="ghost" className="w-full justify-start">
+        <Button variant="ghost" className="w-full justify-start" onClick={() => window.location.href = '/settings'}>
           <Settings className="mr-2 h-4 w-4" />
           Settings
         </Button>
-        <Button variant="ghost" className="w-full justify-start">
+        <Button variant="ghost" className="w-full justify-start" onClick={() => window.location.href = '/help'}>
           <HelpCircle className="mr-2 h-4 w-4" />
           Help & FAQ
         </Button>
         <Separator className="my-2" />
-        <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive">
+        <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive" onClick={async () => {
+          await supabase.auth.signOut();
+          window.location.href = '/';
+        }}>
           <LogOut className="mr-2 h-4 w-4" />
           Logout
         </Button>

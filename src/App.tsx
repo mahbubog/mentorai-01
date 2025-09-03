@@ -14,6 +14,9 @@ import ForgotPasswordPage from "./pages/ForgotPassword";
 import ProfileSetupPage from "./pages/ProfileSetup";
 import OnboardingPage from "./pages/Onboarding";
 import ChatPage from "./pages/ChatPage";
+import Settings from "./pages/Settings";
+import Help from "./pages/Help";
+import GuestChat from "./pages/GuestChat";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +37,9 @@ const App = () => (
           <Route path="/profile-setup" element={<ProfileSetupPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/guest-chat" element={<GuestChat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
