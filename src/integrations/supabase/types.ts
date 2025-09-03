@@ -14,7 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          type: Database["public"]["Enums"]["conversation_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["conversation_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["conversation_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      files: {
+        Row: {
+          file_name: string
+          file_type: Database["public"]["Enums"]["file_type"]
+          file_url: string
+          id: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          file_name: string
+          file_type: Database["public"]["Enums"]["file_type"]
+          file_url: string
+          id?: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          file_name?: string
+          file_type?: Database["public"]["Enums"]["file_type"]
+          file_url?: string
+          id?: string
+          uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          file_references: Json | null
+          id: string
+          is_user: boolean
+          timestamp: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          file_references?: Json | null
+          id?: string
+          is_user: boolean
+          timestamp?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          file_references?: Json | null
+          id?: string
+          is_user?: boolean
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          preferences: Json | null
+          profile_picture_url: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          preferences?: Json | null
+          profile_picture_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          preferences?: Json | null
+          profile_picture_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_exports: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          export_type: Database["public"]["Enums"]["export_type"]
+          export_url: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          export_type: Database["public"]["Enums"]["export_type"]
+          export_url: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          export_type?: Database["public"]["Enums"]["export_type"]
+          export_url?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_exports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +176,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      conversation_type: "academic" | "career"
+      export_type: "pdf" | "text"
+      file_type: "pdf" | "doc" | "excel" | "image"
+      user_role: "student" | "job_seeker" | "both"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +306,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      conversation_type: ["academic", "career"],
+      export_type: ["pdf", "text"],
+      file_type: ["pdf", "doc", "excel", "image"],
+      user_role: ["student", "job_seeker", "both"],
+    },
   },
 } as const

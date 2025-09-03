@@ -1,68 +1,167 @@
 "use client";
 
-import { ChatInput } from "./ChatInput";
+import { useState, useEffect } from "react";
 import { ChatMessages } from "./ChatMessages";
-import { useState } from "react";
-import { Message } from "./ChatMessage";
+import { ChatInput } from "./ChatInput";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Message } from "./ChatMessage";
 
-export function ChatWindow() {
+interface ChatWindowProps {
+  conversationId?: string;
+  conversationType?: 'academic' | 'career';
+  onConversationCreated?: (id: string) => void;
+}
+
+const ChatWindow = ({ conversationId, conversationType = 'academic', onConversationCreated }: ChatWindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSendMessage = async (content: string) => {
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content,
+  // Load messages when conversation changes
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!conversationId) {
+        setMessages([]);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('timestamp', { ascending: true });
+
+        if (error) {
+          console.error('Error loading messages:', error);
+          return;
+        }
+
+        const formattedMessages: Message[] = data.map(msg => ({
+          id: msg.id,
+          role: msg.is_user ? 'user' : 'assistant',
+          content: msg.content,
+        }));
+
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error('Error in loadMessages:', error);
+      }
     };
 
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    loadMessages();
+  }, [conversationId]);
+
+  // Subscribe to real-time message updates
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as any;
+          const formattedMessage: Message = {
+            id: newMessage.id,
+            role: newMessage.is_user ? 'user' : 'assistant',
+            content: newMessage.content,
+          };
+
+          setMessages(prev => {
+            // Check if message already exists to avoid duplicates
+            if (prev.some(msg => msg.id === formattedMessage.id)) {
+              return prev;
+            }
+            return [...prev, formattedMessage];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
+
+  const handleSendMessage = async (messageContent: string) => {
+    if (isLoading) return;
+
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("gemini-chat", {
-        body: { messages: newMessages },
+      console.log('Sending message to gemini-chat function...');
+      
+      // Get auth session
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      
+      if (authError || !session) {
+        throw new Error('Please log in to send messages');
+      }
+
+      const { data, error } = await supabase.functions.invoke('gemini-chat', {
+        body: { 
+          message: messageContent,
+          conversationId,
+          conversationType
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
+      console.log('Function response:', { data, error });
+
       if (error) {
-        throw new Error(`Function invocation failed: ${error.message}`);
+        console.error('Function invocation error:', error);
+        throw new Error(error.message || 'Failed to get AI response');
       }
+
+      if (data?.error) {
+        console.error('AI API error:', data.error);
+        throw new Error(data.error);
+      }
+
+      if (!data?.content) {
+        console.error('No content in response:', data);
+        throw new Error('No response content received from AI');
+      }
+
+      // If a new conversation was created, notify parent
+      if (data.conversationId && data.conversationId !== conversationId) {
+        onConversationCreated?.(data.conversationId);
+      }
+
+    } catch (error: any) {
+      console.error('Error in handleSendMessage:', error);
       
-      if (data.error) {
-        throw new Error(`Gemini API Error: ${data.error}`);
-      }
-
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: data.content,
-      };
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-
-    } catch (err) {
-      console.error(err);
-      const errorContent = err instanceof Error ? err.message : "An unknown error occurred.";
-      const errorMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: `দুঃখিত, একটি ত্রুটি ঘটেছে: ${errorContent}. অনুগ্রহ করে নিশ্চিত করুন আপনার Gemini API কী Supabase-এ সঠিকভাবে সেট করা আছে।`,
-      };
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex-1 p-6 overflow-y-auto">
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex-1 overflow-hidden">
         <ChatMessages messages={messages} />
       </div>
-      <div className="p-4 border-t bg-background">
+      <div className="p-4 border-t border-border bg-card">
         <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </div>
     </div>
   );
-}
+};
+
+export default ChatWindow;
