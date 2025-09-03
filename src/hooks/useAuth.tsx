@@ -58,19 +58,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
+    try {
+      // First create the user account
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
-    return { error };
+      });
+      
+      if (error) return { error };
+      
+      // Then send OTP for email verification
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false, // User already exists
+        },
+      });
+      
+      return { error: otpError };
+    } catch (error: any) {
+      return { error };
+    }
   };
 
   const signOut = async () => {
@@ -94,15 +107,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: 'signup',
+      type: 'email',
     });
     return { error };
   };
 
   const resendOTP = async (email: string) => {
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
+    const { error } = await supabase.auth.signInWithOtp({
       email,
+      options: {
+        shouldCreateUser: false,
+      },
     });
     return { error };
   };
