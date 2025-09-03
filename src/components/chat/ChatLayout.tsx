@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { supabase } from "@/integrations/supabase/client";
