@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      // Create user account without triggering multiple emails
+      // Create user account with OTP verification
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -67,8 +67,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: undefined, // Disable email confirmation links
         },
       });
+      
+      // If account creation successful, send OTP
+      if (!error) {
+        const { error: otpError } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser: false, // User already created above
+          },
+        });
+        return { error: otpError };
+      }
       
       return { error };
     } catch (error: any) {
@@ -106,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        shouldCreateUser: false,
+        shouldCreateUser: false, // Don't create new user, just send OTP
       },
     });
     return { error };

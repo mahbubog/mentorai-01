@@ -71,8 +71,8 @@ export function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
         return;
       }
 
-      toast.success("Verification email sent!", {
-        description: `Please check ${values.email} for a verification code.`,
+      toast.success("Verification code sent!", {
+        description: `Please check ${values.email} for a 6-digit verification code.`,
       });
       onSignUpSuccess(values.email);
     } catch (error: any) {
