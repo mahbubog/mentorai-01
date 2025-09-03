@@ -6,6 +6,7 @@ import { ChatInput } from "./ChatInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Message } from "./ChatMessage";
+import { nanoid } from "nanoid";
 
 interface ChatWindowProps {
   conversationId?: string;
@@ -18,82 +19,55 @@ const ChatWindow = ({ conversationId, conversationType = 'academic', onConversat
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Load messages when conversation changes
+  // Load messages from localStorage when conversation changes
   useEffect(() => {
-    const loadMessages = async () => {
-      if (!conversationId) {
-        setMessages([]);
-        return;
-      }
+    if (!conversationId) {
+      setMessages([]);
+      return;
+    }
 
+    const savedMessages = localStorage.getItem(`chat_${conversationId}`);
+    if (savedMessages) {
       try {
-        const { data, error } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('conversation_id', conversationId)
-          .order('timestamp', { ascending: true });
-
-        if (error) {
-          console.error('Error loading messages:', error);
-          return;
-        }
-
-        const formattedMessages: Message[] = data.map(msg => ({
-          id: msg.id,
-          role: msg.is_user ? 'user' : 'assistant',
-          content: msg.content,
-        }));
-
-        setMessages(formattedMessages);
+        const parsedMessages = JSON.parse(savedMessages);
+        setMessages(parsedMessages);
       } catch (error) {
-        console.error('Error in loadMessages:', error);
+        console.error('Error loading messages from localStorage:', error);
+        setMessages([]);
       }
-    };
-
-    loadMessages();
+    } else {
+      setMessages([]);
+    }
   }, [conversationId]);
 
-  // Subscribe to real-time message updates
+  // Save messages to localStorage whenever messages change
   useEffect(() => {
-    if (!conversationId) return;
+    if (conversationId && messages.length > 0) {
+      localStorage.setItem(`chat_${conversationId}`, JSON.stringify(messages));
+    }
+  }, [messages, conversationId]);
 
-    const channel = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as any;
-          const formattedMessage: Message = {
-            id: newMessage.id,
-            role: newMessage.is_user ? 'user' : 'assistant',
-            content: newMessage.content,
-          };
-
-          setMessages(prev => {
-            // Check if message already exists to avoid duplicates
-            if (prev.some(msg => msg.id === formattedMessage.id)) {
-              return prev;
-            }
-            return [...prev, formattedMessage];
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId]);
-
-  const handleSendMessage = async (messageContent: string) => {
+  const handleSendMessage = async (messageContent: string, files?: File[]) => {
     if (isLoading) return;
 
+    // Create a unique conversation ID if not exists
+    const currentConversationId = conversationId || nanoid();
+    
+    // Add user message immediately to UI
+    const userMessage: Message = {
+      id: nanoid(),
+      role: 'user',
+      content: messageContent,
+    };
+
+    // Add thinking message immediately
+    const thinkingMessage: Message = {
+      id: 'thinking',
+      role: 'assistant',
+      content: 'thinking...',
+    };
+
+    setMessages(prev => [...prev, userMessage, thinkingMessage]);
     setIsLoading(true);
 
     try {
@@ -106,12 +80,36 @@ const ChatWindow = ({ conversationId, conversationType = 'academic', onConversat
         throw new Error('Please log in to send messages');
       }
 
+      // Prepare request body
+      const requestBody: any = {
+        message: messageContent,
+        conversationId: currentConversationId,
+        conversationType,
+        chatHistory: messages.filter(m => m.id !== 'thinking')
+      };
+
+      // Handle file uploads if any
+      if (files && files.length > 0) {
+        const filePromises = files.map(async (file) => {
+          const reader = new FileReader();
+          return new Promise((resolve) => {
+            reader.onload = () => {
+              resolve({
+                name: file.name,
+                type: file.type,
+                content: reader.result
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+        
+        const fileContents = await Promise.all(filePromises);
+        requestBody.files = fileContents;
+      }
+
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
-        body: { 
-          message: messageContent,
-          conversationId,
-          conversationType
-        },
+        body: requestBody,
         headers: {
           Authorization: `Bearer ${session.access_token}`
         }
@@ -134,6 +132,17 @@ const ChatWindow = ({ conversationId, conversationType = 'academic', onConversat
         throw new Error('No response content received from AI');
       }
 
+      // Replace thinking message with actual AI response
+      setMessages(prev => {
+        const newMessages = prev.filter(m => m.id !== 'thinking');
+        const aiMessage: Message = {
+          id: nanoid(),
+          role: 'assistant',
+          content: data.content,
+        };
+        return [...newMessages, aiMessage];
+      });
+
       // If a new conversation was created, notify parent
       if (data.conversationId && data.conversationId !== conversationId) {
         onConversationCreated?.(data.conversationId);
@@ -141,6 +150,9 @@ const ChatWindow = ({ conversationId, conversationType = 'academic', onConversat
 
     } catch (error: any) {
       console.error('Error in handleSendMessage:', error);
+      
+      // Remove thinking message on error
+      setMessages(prev => prev.filter(m => m.id !== 'thinking'));
       
       toast({
         variant: "destructive",

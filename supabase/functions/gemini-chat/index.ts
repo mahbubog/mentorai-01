@@ -12,8 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationId, conversationType = 'academic' } = await req.json();
-    console.log('Processing request:', { message: message?.slice(0, 100), conversationId, conversationType });
+    const { message, conversationId, conversationType = 'academic', chatHistory = [], files = [] } = await req.json();
+    console.log('Processing request:', { message: message?.slice(0, 100), conversationId, conversationType, filesCount: files.length });
 
     // Get auth token from request
     const authHeader = req.headers.get('Authorization');
@@ -56,43 +56,8 @@ serve(async (req) => {
       });
     }
 
-    let actualConversationId = conversationId;
-
-    // Create new conversation if not provided
-    if (!conversationId) {
-      const { data: newConversation, error: convError } = await supabase
-        .from('conversations')
-        .insert({
-          user_id: user.id,
-          title: message.slice(0, 50) + (message.length > 50 ? '...' : ''),
-          type: conversationType
-        })
-        .select()
-        .single();
-
-      if (convError) {
-        console.error('Error creating conversation:', convError);
-        return new Response(JSON.stringify({ error: 'Failed to create conversation' }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      actualConversationId = newConversation.id;
-      console.log('Created new conversation:', actualConversationId);
-    }
-
-    // Get conversation history for context
-    const { data: messages, error: messagesError } = await supabase
-      .from('messages')
-      .select('content, is_user, timestamp')
-      .eq('conversation_id', actualConversationId)
-      .order('timestamp', { ascending: true })
-      .limit(10);
-
-    if (messagesError) {
-      console.error('Error fetching messages:', messagesError);
-    }
+    const actualConversationId = conversationId || `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log('Using conversation ID:', actualConversationId);
 
     // Get user preferences
     const { data: profile } = await supabase
@@ -109,16 +74,46 @@ serve(async (req) => {
 
     const systemPrompt = systemPrompts[conversationType as keyof typeof systemPrompts] || systemPrompts.academic;
 
-    // Prepare conversation history for Gemini
-    const conversationHistory = messages?.map(msg => ({
-      role: msg.is_user ? 'user' : 'model',
+    // Prepare conversation history from localStorage data
+    const conversationHistory = chatHistory.map((msg: any) => ({
+      role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }]
-    })) || [];
+    }));
+
+    // Prepare current user message parts
+    const currentMessageParts: any[] = [{ text: message }];
+    
+    // Handle file uploads if present
+    if (files && files.length > 0) {
+      for (const file of files) {
+        try {
+          if (file.type.startsWith('image/')) {
+            // Handle image files
+            const base64Data = file.content.split(',')[1];
+            currentMessageParts.push({
+              inline_data: {
+                mime_type: file.type,
+                data: base64Data
+              }
+            });
+          } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+            // Handle text files
+            const textContent = atob(file.content.split(',')[1]);
+            currentMessageParts.push({
+              text: `File content of ${file.name}:\n${textContent}`
+            });
+          }
+          // Add more file type handlers as needed
+        } catch (error) {
+          console.error('Error processing file:', file.name, error);
+        }
+      }
+    }
 
     // Add current user message
     conversationHistory.push({
       role: 'user',
-      parts: [{ text: message }]
+      parts: currentMessageParts
     });
 
     // Add system prompt as the first message
@@ -180,42 +175,8 @@ serve(async (req) => {
     const aiContent = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I couldn\'t generate a response. Please try again.';
 
     console.log('Generated AI response length:', aiContent.length);
-
-    // Save user message to database
-    const { error: userMsgError } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: actualConversationId,
-        content: message,
-        is_user: true
-      });
-
-    if (userMsgError) {
-      console.error('Error saving user message:', userMsgError);
-    }
-
-    // Save AI response to database
-    const { error: aiMsgError } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: actualConversationId,
-        content: aiContent,
-        is_user: false
-      });
-
-    if (aiMsgError) {
-      console.error('Error saving AI message:', aiMsgError);
-    }
-
-    // Update conversation timestamp
-    const { error: updateError } = await supabase
-      .from('conversations')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', actualConversationId);
-
-    if (updateError) {
-      console.error('Error updating conversation:', updateError);
-    }
+    
+    // Note: Messages are now stored in localStorage on client side, no database operations needed
     
     console.log('Successfully processed request');
     return new Response(JSON.stringify({ 
