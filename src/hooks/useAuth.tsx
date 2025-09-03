@@ -58,34 +58,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      // Create user account with OTP verification
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          emailRedirectTo: undefined, // Disable email confirmation links
+    // This function now relies on Supabase to send a confirmation OTP.
+    // Ensure your Supabase project's "Confirm signup" email template uses the {{ .Token }} variable.
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
         },
-      });
-      
-      // If account creation successful, send OTP
-      if (!error) {
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            shouldCreateUser: false, // User already created above
-          },
-        });
-        return { error: otpError };
-      }
-      
-      return { error };
-    } catch (error: any) {
-      return { error };
-    }
+      },
+    });
+    return { error };
   };
 
   const signOut = async () => {
@@ -106,20 +90,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const verifyOTP = async (email: string, token: string) => {
+    // Verify the OTP for signup confirmation
     const { error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: 'email',
+      type: 'signup',
     });
     return { error };
   };
 
   const resendOTP = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false, // Don't create new user, just send OTP
-      },
+    // Resend the signup confirmation OTP
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
     });
     return { error };
   };
