@@ -1,61 +1,76 @@
-/// <reference lib="deno.ns" />
-/// <reference types="https://deno.land/std@0.190.0/http/server.d.ts" />
-/// <reference types="https://esm.sh/@google/generative-ai@0.15.0/dist/index.d.ts" />
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-import { serve, Request } from "https://deno.land/std@0.190.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.15.0";
-
-// CORS হেডারগুলো সেট করা হচ্ছে যাতে ব্রাউজার থেকে ফাংশনটি কল করা যায়
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req: Request) => {
-  // OPTIONS অনুরোধ হ্যান্ডেল করা হচ্ছে (CORS preflight)
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // অনুরোধের বডি থেকে বার্তাগুলো পড়া হচ্ছে
     const { messages } = await req.json();
+    console.log('Processing request with', messages?.length || 0, 'messages');
 
-    // Supabase secrets থেকে Gemini API কী পড়া হচ্ছে
-    const API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!API_KEY) {
-      throw new Error("Gemini API key is not set in environment variables.");
-    }
-
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // Gemini API-এর জন্য চ্যাট হিস্ট্রি ফরম্যাট করা হচ্ছে
-    const history = messages.slice(0, -1).map((msg: { role: string; content: string }) => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content }],
-    }));
+    // Check if API key is available in environment
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    console.log('Environment check - GEMINI_API_KEY exists:', !!GEMINI_API_KEY);
+    console.log('Available env vars:', Object.keys(Deno.env.toObject()));
     
-    const lastMessage = messages[messages.length - 1];
-
-    const chat = model.startChat({ history });
-    const result = await chat.sendMessage(lastMessage.content);
-    const response = await result.response;
-    const text = response.text();
-
-    return new Response(JSON.stringify({ content: text }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-  } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    let errorMessage = "An unknown error occurred.";
-    if (error instanceof Error) {
-      errorMessage = error.message;
+    if (!GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY not found in environment variables');
+      return new Response(JSON.stringify({ 
+        error: 'GEMINI_API_KEY is not configured in Supabase secrets' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+
+    // Make request to Gemini API
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: messages.map(msg => ({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }]
+        }))
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error response:', response.status, errorText);
+      return new Response(JSON.stringify({ 
+        error: `Gemini API error: ${response.status} - ${errorText}` 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
+    
+    console.log('Successfully generated response');
+    return new Response(JSON.stringify({ content }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Function execution error:', error);
+    return new Response(JSON.stringify({ 
+      error: `Server error: ${error.message}` 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
