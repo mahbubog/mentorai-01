@@ -5,6 +5,7 @@ import { CoursesPage } from './pages/public/CoursesPage';
 import { CourseDetailsPage } from './pages/public/CourseDetailsPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
+import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 import { UserDashboard } from './pages/user/UserDashboard';
 import { MyCoursesPage } from './pages/user/MyCoursesPage';
 import { PaymentHistoryPage } from './pages/user/PaymentHistoryPage';
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/courses/:slug" element={<CourseDetailsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
           <Route
             path="/dashboard"
