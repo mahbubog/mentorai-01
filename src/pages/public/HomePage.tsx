@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
-import { BookOpen, Users, Award, Clock } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, Mail, Phone, MapPin, Star, User, GraduationCap } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -15,6 +15,8 @@ interface Course {
   discount_price: number | null;
   rating: number;
   enrolled_count: number;
+  instructor_name: string;
+  duration_hours: number;
 }
 
 export function HomePage() {
@@ -47,21 +49,33 @@ export function HomePage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/1438072/pexels-photo-1438072.jpeg')] opacity-10 bg-cover bg-center"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Learn, Grow, Succeed
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              Transform Your Future with
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">
+                Expert-Led Learning
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              Master new skills with expert-led courses designed for your success
+            <p className="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              Master in-demand skills with live and recorded courses taught by industry professionals. Start your learning journey today.
             </p>
-            <Link
-              to="/courses"
-              className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition"
-            >
-              Browse Courses
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/courses"
+                className="inline-block bg-white text-blue-600 px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                Browse Courses
+              </Link>
+              <Link
+                to="/register"
+                className="inline-block bg-blue-500 bg-opacity-20 backdrop-blur-sm border-2 border-white text-white px-10 py-4 rounded-lg font-semibold text-lg hover:bg-opacity-30 transition"
+              >
+                Get Started Free
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -105,47 +119,66 @@ export function HomePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredCourses.map((course) => (
-                <Link
+                <div
                   key={course.id}
-                  to={`/courses/${course.slug}`}
-                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition group"
+                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 group"
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-52 overflow-hidden">
                     <img
                       src={course.thumbnail || 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg'}
                       alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                     />
                     <div className="absolute top-4 right-4">
-                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
                         {course.course_type === 'live' ? 'Live' : 'Recorded'}
                       </span>
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition line-clamp-2 min-h-[3.5rem]">
                       {course.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed min-h-[2.5rem]">
                       {course.short_description}
                     </p>
-                    <div className="flex items-center justify-between">
+
+                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <User className="h-4 w-4 mr-1" />
+                        <span className="font-medium">{course.instructor_name || 'Expert Instructor'}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>{course.duration_hours || 10}h</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-2">
                         <span className="text-2xl font-bold text-blue-600">
                           ৳{course.discount_price || course.price}
                         </span>
                         {course.discount_price && (
-                          <span className="text-gray-400 line-through">
+                          <span className="text-gray-400 line-through text-sm">
                             ৳{course.price}
                           </span>
                         )}
                       </div>
-                      <span className="text-sm text-gray-500">
-                        {course.enrolled_count} enrolled
-                      </span>
+                      <div className="flex items-center text-yellow-500">
+                        <Star className="h-4 w-4 fill-current" />
+                        <span className="ml-1 text-gray-700 font-semibold text-sm">{course.rating || 4.5}</span>
+                      </div>
                     </div>
+
+                    <Link
+                      to={`/courses/${course.slug}`}
+                      className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                    >
+                      View Details
+                    </Link>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
@@ -161,9 +194,142 @@ export function HomePage() {
         </div>
       </section>
 
+      <section id="about" className="py-20 bg-gradient-to-br from-blue-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              About Us
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <img
+                src="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg"
+                alt="Learning"
+                className="rounded-2xl shadow-2xl"
+              />
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-6">
+                Empowering Learners Worldwide
+              </h3>
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                CourseHub is a leading online learning platform dedicated to providing high-quality education to students around the globe. We believe that education should be accessible, engaging, and transformative.
+              </p>
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                Our expert instructors bring years of industry experience and are passionate about sharing their knowledge. Whether you're looking to advance your career, learn a new skill, or pursue a passion, we have the perfect course for you.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">50+</div>
+                  <div className="text-gray-600">Expert Courses</div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">1000+</div>
+                  <div className="text-gray-600">Happy Students</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Get In Touch
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full mb-4"></div>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-xl shadow-md hover:shadow-xl transition text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4">
+                <Mail className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Email Us</h3>
+              <p className="text-gray-600">info@coursehub.com</p>
+              <p className="text-gray-600">support@coursehub.com</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-xl shadow-md hover:shadow-xl transition text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4">
+                <Phone className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Call Us</h3>
+              <p className="text-gray-600">+880 1234-567890</p>
+              <p className="text-gray-600">Mon-Fri, 9AM-6PM</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-xl shadow-md hover:shadow-xl transition text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4">
+                <MapPin className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Visit Us</h3>
+              <p className="text-gray-600">123 Learning Street</p>
+              <p className="text-gray-600">Dhaka, Bangladesh</p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-2xl p-12 text-center text-white">
+            <h3 className="text-3xl font-bold mb-4">Ready to Start Learning?</h3>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              Join thousands of students already learning on CourseHub. Create your account today and get access to our entire course library.
+            </p>
+            <Link
+              to="/register"
+              className="inline-block bg-white text-blue-600 px-10 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition shadow-lg"
+            >
+              Sign Up Now
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <GraduationCap className="h-8 w-8 text-blue-400" />
+                <span className="text-xl font-bold">CourseHub</span>
+              </div>
+              <p className="text-gray-400">
+                Empowering learners worldwide with quality education and expert-led courses.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><Link to="/" className="text-gray-400 hover:text-white transition">Home</Link></li>
+                <li><Link to="/courses" className="text-gray-400 hover:text-white transition">Courses</Link></li>
+                <li><a href="#about" className="text-gray-400 hover:text-white transition">About Us</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Support</h4>
+              <ul className="space-y-2">
+                <li><a href="#contact" className="text-gray-400 hover:text-white transition">Contact</a></li>
+                <li><Link to="/login" className="text-gray-400 hover:text-white transition">Login</Link></li>
+                <li><Link to="/register" className="text-gray-400 hover:text-white transition">Register</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>info@coursehub.com</li>
+                <li>+880 1234-567890</li>
+                <li>Dhaka, Bangladesh</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-8 text-center">
             <p className="text-gray-400">© 2024 CourseHub. All rights reserved.</p>
           </div>
         </div>

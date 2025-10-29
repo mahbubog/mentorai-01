@@ -25,12 +25,18 @@ export function Header() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-blue-600 transition">
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition font-medium">
               Home
             </Link>
-            <Link to="/courses" className="text-gray-700 hover:text-blue-600 transition">
+            <Link to="/courses" className="text-gray-700 hover:text-blue-600 transition font-medium">
               Courses
             </Link>
+            <a href="#about" className="text-gray-700 hover:text-blue-600 transition font-medium">
+              About Us
+            </a>
+            <a href="#contact" className="text-gray-700 hover:text-blue-600 transition font-medium">
+              Contact
+            </a>
           </div>
 
           <div className="flex items-center space-x-4">
