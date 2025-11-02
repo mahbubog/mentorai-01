@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
-import { BookOpen, Users, Award, Clock, Mail, Phone, MapPin, Star, User, GraduationCap } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, Mail, Phone, MapPin, Star, User, GraduationCap, CheckCircle, Zap, Target, Trophy } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -80,21 +80,23 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: BookOpen, title: '50+ Courses', description: 'Expert-led courses' },
-              { icon: Users, title: '1000+ Students', description: 'Active learners' },
-              { icon: Award, title: 'Certificates', description: 'Earn recognition' },
-              { icon: Clock, title: 'Lifetime Access', description: 'Learn at your pace' },
+              { icon: BookOpen, title: '50+', description: 'Expert Courses', value: '50+' },
+              { icon: Users, title: '1000+', description: 'Happy Students', value: '1000+' },
+              { icon: Trophy, title: '95%', description: 'Success Rate', value: '95%' },
+              { icon: Clock, title: 'Lifetime', description: 'Course Access', value: 'Lifetime' },
             ].map((stat, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-xl shadow-md hover:shadow-xl transition text-center border border-blue-100">
                 <div className="flex justify-center mb-4">
-                  <stat.icon className="h-12 w-12 text-blue-600" />
+                  <div className="bg-blue-600 p-3 rounded-full text-white">
+                    <stat.icon className="h-8 w-8" />
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{stat.title}</h3>
-                <p className="text-gray-600">{stat.description}</p>
+                <h3 className="text-4xl font-bold text-blue-600 mb-2">{stat.value}</h3>
+                <p className="text-gray-600 font-medium">{stat.description}</p>
               </div>
             ))}
           </div>
@@ -190,6 +192,144 @@ export function HomePage() {
             >
               View All Courses
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-gradient-to-br from-slate-900 to-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Why Choose CourseHub?
+            </h2>
+            <div className="w-24 h-1 bg-blue-400 mx-auto rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: CheckCircle,
+                title: 'Expert Instructors',
+                description: 'Learn from industry professionals with years of real-world experience'
+              },
+              {
+                icon: Award,
+                title: 'Certificates of Completion',
+                description: 'Earn recognized certificates to boost your professional profile'
+              },
+              {
+                icon: Clock,
+                title: 'Lifetime Access',
+                description: 'Access your courses anytime, anywhere, at your own pace'
+              },
+              {
+                icon: Zap,
+                title: 'Interactive Learning',
+                description: 'Engage with live sessions, quizzes, and hands-on projects'
+              },
+              {
+                icon: Target,
+                title: 'Career Focused',
+                description: 'Courses designed to help you advance in your chosen field'
+              },
+              {
+                icon: Users,
+                title: 'Community Support',
+                description: 'Join thousands of learners and get peer support'
+              },
+            ].map((item, index) => (
+              <div key={index} className="bg-white bg-opacity-10 backdrop-blur-md p-8 rounded-xl border border-white border-opacity-20 hover:bg-opacity-20 transition">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <item.icon className="h-10 w-10 text-blue-400" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                    <p className="text-blue-100">{item.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              What Our Students Say
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: 'Sarah Ahmed',
+                role: 'UI/UX Designer',
+                image: 'https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg',
+                rating: 5,
+                comment: 'CourseHub transformed my career! The courses are well-structured and the instructors are incredibly supportive. Highly recommended!'
+              },
+              {
+                name: 'Mohammad Hassan',
+                role: 'Full Stack Developer',
+                image: 'https://images.pexels.com/photos/1181605/pexels-photo-1181605.jpeg',
+                rating: 5,
+                comment: 'The hands-on projects and lifetime access make this platform exceptional. I got my dream job after completing the courses!'
+              },
+              {
+                name: 'Fatima Khan',
+                role: 'Data Analyst',
+                image: 'https://images.pexels.com/photos/1181599/pexels-photo-1181599.jpeg',
+                rating: 5,
+                comment: 'Great courses with practical applications. The community support and mentorship made all the difference in my learning journey.'
+              },
+              {
+                name: 'Ahmed Rahman',
+                role: 'Business Manager',
+                image: 'https://images.pexels.com/photos/1181581/pexels-photo-1181581.jpeg',
+                rating: 5,
+                comment: 'Affordable, high-quality education delivered by experts. I completed 3 courses and already seeing results in my career!'
+              },
+              {
+                name: 'Nisha Patel',
+                role: 'Software Engineer',
+                image: 'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg',
+                rating: 5,
+                comment: 'The course materials are comprehensive and up-to-date. Instructors are responsive and genuinely care about student success.'
+              },
+              {
+                name: 'Karim Islam',
+                role: 'Graphic Designer',
+                image: 'https://images.pexels.com/photos/1181566/pexels-photo-1181566.jpeg',
+                rating: 5,
+                comment: 'Best investment for my professional development. The certificate has already helped me land better projects!'
+              },
+            ].map((testimonial, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-md p-8 hover:shadow-xl transition">
+                <div className="flex items-center mb-4">
+                  <img
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="h-16 w-16 rounded-full object-cover mr-4"
+                  />
+                  <div>
+                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+
+                <div className="flex mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+
+                <p className="text-gray-700 italic">"{testimonial.comment}"</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
