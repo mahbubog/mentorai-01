@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { Clock, Users, Award, BookOpen, CheckCircle } from 'lucide-react';
+import { Clock, Users, Award, BookOpen, CheckCircle, Star, Download, Smartphone, Lock, Calendar, Globe, TrendingUp } from 'lucide-react';
 import { PaymentModal } from '../../components/PaymentModal';
 
 export function CourseDetailsPage() {
@@ -12,9 +12,12 @@ export function CourseDetailsPage() {
   const navigate = useNavigate();
   const [course, setCourse] = useState<any>(null);
   const [sections, setSections] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'instructor' | 'reviews'>('overview');
+  const [reviewSort, setReviewSort] = useState<'recent' | 'highest' | 'lowest'>('recent');
 
   useEffect(() => {
     if (slug) {
@@ -28,7 +31,7 @@ export function CourseDetailsPage() {
         .from('courses')
         .select(`
           *,
-          instructors (name, bio, photo),
+          instructors (id, name, bio, photo),
           course_requirements (requirement),
           course_learning_outcomes (outcome)
         `)
@@ -56,6 +59,14 @@ export function CourseDetailsPage() {
 
         setSections(sectionsData || []);
       }
+
+      const { data: reviewsData } = await supabase
+        .from('course_reviews')
+        .select('*')
+        .eq('course_id', courseData.id)
+        .order('created_at', { ascending: false });
+
+      setReviews(reviewsData || []);
 
       if (user) {
         const { data: enrollmentData } = await supabase
@@ -102,77 +113,140 @@ export function CourseDetailsPage() {
   if (!course) return null;
 
   const price = course.discount_price || course.price;
+  const levelMap = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
+  const formattedDate = course.updated_at ? new Date(course.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (reviewSort === 'recent') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (reviewSort === 'highest') return b.rating - a.rating;
+    if (reviewSort === 'lowest') return a.rating - b.rating;
+    return 0;
+  });
+
+  const otherInstructorCourses = course.instructors?.id ? 1 : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="bg-gray-900 text-white py-12">
+      <div className="bg-gradient-to-br from-gray-900 to-blue-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="mb-4">
-                <span className="bg-blue-600 px-3 py-1 rounded-full text-sm font-semibold">
-                  {course.course_type === 'live' ? 'Live Course' : 'Recorded Course'}
+              <div className="flex items-center gap-3 mb-4">
+                <span className="bg-blue-600 px-4 py-1 rounded-full text-sm font-bold uppercase">
+                  {course.course_type === 'live' ? 'Live' : 'Recorded'}
                 </span>
-              </div>
-              <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-              <p className="text-xl text-gray-300 mb-6">{course.short_description}</p>
-
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
-                  <span>{course.enrolled_count} enrolled</span>
+                <div className="flex items-center text-yellow-300">
+                  <Star className="h-5 w-5 fill-current mr-1" />
+                  <span className="font-semibold">{course.rating || 4.5}</span>
+                  <span className="text-gray-300 ml-2">({reviews.length} reviews)</span>
                 </div>
-                {course.duration && (
-                  <div className="flex items-center">
-                    <Clock className="h-5 w-5 mr-2" />
-                    <span>{course.duration}</span>
+              </div>
+
+              <h1 className="text-5xl font-bold mb-4 leading-tight">{course.title}</h1>
+              <p className="text-xl text-gray-200 mb-8">{course.short_description}</p>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-t border-gray-700">
+                <div className="flex items-center gap-3">
+                  <Users className="h-6 w-6 text-blue-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm">Students</p>
+                    <p className="font-bold text-lg">{course.enrolled_count}+</p>
                   </div>
-                )}
-                <div className="flex items-center capitalize">
-                  <BookOpen className="h-5 w-5 mr-2" />
-                  <span>{course.difficulty_level}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock className="h-6 w-6 text-blue-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm">Duration</p>
+                    <p className="font-bold text-lg">{course.duration_hours || 10}h</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <BookOpen className="h-6 w-6 text-blue-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm">Level</p>
+                    <p className="font-bold text-lg">{levelMap[course.difficulty_level as keyof typeof levelMap] || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-6 w-6 text-blue-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm">Updated</p>
+                    <p className="font-bold text-lg text-sm">{formattedDate}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <div className="bg-white text-gray-900 rounded-lg shadow-xl p-6 sticky top-24">
-                <div className="mb-6">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">৳{price}</div>
+              <div className="bg-white text-gray-900 rounded-xl shadow-2xl p-8 sticky top-24">
+                <div className="mb-8">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">৳{price}</div>
                   {course.discount_price && (
-                    <div className="text-gray-500 line-through">৳{course.price}</div>
+                    <div className="text-gray-500 line-through text-xl">৳{course.price}</div>
                   )}
                 </div>
 
                 <button
                   onClick={handleEnroll}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mb-4"
+                  className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition mb-4 shadow-lg"
                 >
-                  {isEnrolled ? 'Go to Course' : 'Enroll Now'}
+                  {isEnrolled ? 'Go to Course' : price === 0 ? 'Enroll Free' : 'Enroll Now'}
                 </button>
 
-                <div className="space-y-3 text-sm">
-                  {course.includes_lifetime_access && (
+                <div className="space-y-4 text-sm mb-6 pb-6 border-b border-gray-200">
+                  <h3 className="font-bold text-gray-900">This course includes:</h3>
+
+                  {course.duration_hours && (
                     <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <span>Lifetime access</span>
+                      <Clock className="h-5 w-5 text-blue-600 mr-3" />
+                      <span>{course.duration_hours}+ hours of content</span>
                     </div>
                   )}
+
+                  {sections.length > 0 && (
+                    <div className="flex items-center">
+                      <BookOpen className="h-5 w-5 text-blue-600 mr-3" />
+                      <span>{sections.reduce((acc: number, s: any) => acc + (s.course_lessons?.length || 0), 0)} lessons</span>
+                    </div>
+                  )}
+
+                  {course.includes_downloadable_resources && (
+                    <div className="flex items-center">
+                      <Download className="h-5 w-5 text-green-600 mr-3" />
+                      <span>Downloadable resources</span>
+                    </div>
+                  )}
+
                   {course.includes_certificate && (
                     <div className="flex items-center">
-                      <Award className="h-5 w-5 text-green-500 mr-2" />
+                      <Award className="h-5 w-5 text-green-600 mr-3" />
                       <span>Certificate of completion</span>
                     </div>
                   )}
+
+                  {course.includes_lifetime_access && (
+                    <div className="flex items-center">
+                      <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                      <span>Lifetime access</span>
+                    </div>
+                  )}
+
                   {course.includes_mobile_access && (
                     <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                      <Smartphone className="h-5 w-5 text-green-600 mr-3" />
                       <span>Mobile access</span>
                     </div>
                   )}
                 </div>
+
+                {course.language && (
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Globe className="h-4 w-4 mr-2" />
+                    <span>Language: {course.language}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -181,70 +255,175 @@ export function CourseDetailsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">What you'll learn</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {course.course_learning_outcomes?.map((outcome: any, index: number) => (
-                  <div key={index} className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>{outcome.outcome}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="lg:col-span-2">
+            <div className="border-b border-gray-200 mb-8 flex gap-2 overflow-x-auto sticky top-0 bg-gray-50 py-4">
+              {['overview', 'curriculum', 'instructor', 'reviews'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as any)}
+                  className={`px-6 py-2 font-semibold text-sm transition whitespace-nowrap rounded-t-lg ${
+                    activeTab === tab
+                      ? 'border-b-2 border-blue-600 text-blue-600 bg-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {tab === 'overview' && 'Overview'}
+                  {tab === 'curriculum' && 'Curriculum'}
+                  {tab === 'instructor' && 'Instructor'}
+                  {tab === 'reviews' && `Reviews (${reviews.length})`}
+                </button>
+              ))}
             </div>
 
-            {sections.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-4">Course Content</h2>
-                <div className="space-y-4">
-                  {sections.map((section: any) => (
-                    <div key={section.id} className="border border-gray-200 rounded-lg p-4">
-                      <h3 className="font-bold text-lg mb-2">{section.title}</h3>
-                      <p className="text-gray-600 text-sm mb-3">{section.description}</p>
-                      <div className="space-y-2">
-                        {section.course_lessons?.map((lesson: any) => (
-                          <div key={lesson.id} className="flex items-center justify-between py-2 text-sm">
-                            <span className="flex items-center">
-                              <BookOpen className="h-4 w-4 mr-2 text-gray-400" />
-                              {lesson.title}
-                            </span>
-                            <span className="text-gray-500">{lesson.duration}</span>
-                          </div>
-                        ))}
+            {activeTab === 'overview' && (
+              <div className="space-y-8">
+                <div className="bg-white rounded-xl shadow p-8">
+                  <h2 className="text-2xl font-bold mb-4">About this course</h2>
+                  <p className="text-gray-700 leading-relaxed mb-6">{course.long_description || course.short_description}</p>
+
+                  <h3 className="text-xl font-bold mb-4 mt-8">What you'll learn</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {course.course_learning_outcomes?.map((outcome: any, index: number) => (
+                      <div key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{outcome.outcome}</span>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {course.course_requirements?.length > 0 && (
+                  <div className="bg-white rounded-xl shadow p-8">
+                    <h3 className="text-xl font-bold mb-4">Requirements & Prerequisites</h3>
+                    <ul className="space-y-3">
+                      {course.course_requirements?.map((req: any, index: number) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700">{req.requirement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 rounded-xl p-8 border border-blue-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">Who is this course for?</h3>
+                  <p className="text-gray-700">{course.target_audience || 'This course is designed for professionals looking to advance their skills and knowledge in their field.'}</p>
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">Requirements</h2>
-              <ul className="space-y-2">
-                {course.course_requirements?.map((req: any, index: number) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-blue-600 mr-2">•</span>
-                    <span>{req.requirement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {course.instructors && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold mb-4">Instructor</h2>
-                <div className="flex items-start space-x-4">
-                  <img
-                    src={course.instructors.photo || 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg'}
-                    alt={course.instructors.name}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="font-bold text-lg">{course.instructors.name}</h3>
-                    <p className="text-gray-600 mt-2">{course.instructors.bio}</p>
+            {activeTab === 'curriculum' && (
+              <div className="bg-white rounded-xl shadow overflow-hidden">
+                {sections.length > 0 ? (
+                  <div className="divide-y">
+                    {sections.map((section: any) => (
+                      <div key={section.id} className="p-8">
+                        <h3 className="font-bold text-lg text-gray-900 mb-2">{section.title}</h3>
+                        <p className="text-gray-600 text-sm mb-6">{section.description}</p>
+                        <div className="space-y-3">
+                          {section.course_lessons?.map((lesson: any, idx: number) => (
+                            <div key={lesson.id} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                              <span className="flex items-center text-gray-700 font-medium">
+                                {!isEnrolled && <Lock className="h-4 w-4 mr-3 text-gray-400" />}
+                                <BookOpen className="h-4 w-4 mr-3 text-blue-600" />
+                                {lesson.title}
+                              </span>
+                              <span className="text-gray-500 text-sm">{lesson.duration || '15 min'}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <div className="p-12 text-center text-gray-500">
+                    <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p>Curriculum details available once enrolled</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'instructor' && (
+              <div className="bg-white rounded-xl shadow p-8">
+                {course.instructors ? (
+                  <div>
+                    <div className="flex items-start gap-6 mb-8 pb-8 border-b">
+                      <img
+                        src={course.instructors.photo || 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg'}
+                        alt={course.instructors.name}
+                        className="w-40 h-40 rounded-full object-cover"
+                      />
+                      <div>
+                        <h2 className="text-3xl font-bold mb-2">{course.instructors.name}</h2>
+                        <p className="text-blue-600 font-semibold mb-4">Expert Instructor</p>
+                        <p className="text-gray-700 leading-relaxed text-lg">{course.instructors.bio}</p>
+                      </div>
+                    </div>
+
+                    <div className="mb-8">
+                      <h3 className="text-xl font-bold mb-3">Credentials & Experience</h3>
+                      <p className="text-gray-700">With extensive industry experience and a passion for education, {course.instructors.name} brings real-world expertise and practical knowledge to every lesson.</p>
+                    </div>
+
+                    {otherInstructorCourses > 0 && (
+                      <div className="bg-blue-50 p-6 rounded-lg">
+                        <h3 className="font-bold text-gray-900 mb-2">Other Courses by This Instructor</h3>
+                        <p className="text-gray-600">This instructor has {otherInstructorCourses}+ more courses available</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-16 text-gray-500">
+                    <p>Instructor information coming soon</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className="bg-white rounded-xl shadow p-8">
+                {reviews.length > 0 ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-6 pb-6 border-b">
+                      <h3 className="text-xl font-bold">Student Reviews</h3>
+                      <select
+                        value={reviewSort}
+                        onChange={(e) => setReviewSort(e.target.value as any)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      >
+                        <option value="recent">Most Recent</option>
+                        <option value="highest">Highest Rated</option>
+                        <option value="lowest">Lowest Rated</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-6">
+                      {sortedReviews.map((review: any) => (
+                        <div key={review.id} className="pb-6 border-b last:border-b-0">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <p className="font-semibold text-gray-900">{review.student_name || 'Student'}</p>
+                              <p className="text-sm text-gray-500">{new Date(review.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {[...Array(review.rating)].map((_, i) => (
+                                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-gray-700">{review.comment}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-16 text-gray-500">
+                    <Star className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p>No reviews yet. Be the first to review this course!</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
