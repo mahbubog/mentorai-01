@@ -16,7 +16,7 @@
     "@capacitor/core": "^7.4.4",
     "@capacitor/ios": "^7.4.4",
     "@supabase/supabase-js": "^2.57.4",
-    "lucide-react": "^0.411.0",
+    "lucide-react": "^0.417.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.9.4"
