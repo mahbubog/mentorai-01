@@ -18,7 +18,7 @@ export function UserDashboard() {
     completed: 0,
     pendingPayments: 0,
   });
-  const [recentCourses, setRecentCourses] = useState<CourseRow[]>([]);
+  const [recentEnrollments, setRecentEnrollments] = useState<EnrollmentWithCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function UserDashboard() {
         pendingPayments: payments?.length || 0,
       });
 
-      setRecentCourses(typedEnrollments.map((e) => e.courses) || []);
+      setRecentEnrollments(typedEnrollments);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -72,6 +72,7 @@ export function UserDashboard() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
 
+        {/* Pending Payments Alert */}
         {stats.pendingPayments > 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start">
             <AlertCircle className="h-5 w-5 text-yellow-600 mr-3 mt-0.5" />
@@ -87,6 +88,7 @@ export function UserDashboard() {
           </div>
         )}
 
+        {/* Quick Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
@@ -121,6 +123,7 @@ export function UserDashboard() {
           </div>
         </div>
 
+        {/* Continue Learning Section */}
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b">
             <h2 className="text-xl font-bold text-gray-900">Continue Learning</h2>
@@ -129,29 +132,46 @@ export function UserDashboard() {
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
-          ) : recentCourses.length > 0 ? (
+          ) : recentEnrollments.length > 0 ? (
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {recentCourses.map((course) => (
+                {recentEnrollments.map((enrollment) => (
                   <Link
-                    key={course.id}
-                    to={`/learn/${course.id}`}
-                    className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow transition"
+                    key={enrollment.id}
+                    to={`/learn/${enrollment.course_id}`}
+                    className="flex flex-col space-y-3 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow transition"
                   >
-                    <img
-                      src={course.thumbnail || 'https://via.placeholder.com/96'}
-                      alt={course.title}
-                      className="w-24 h-24 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1">{course.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {course.short_description}
-                      </p>
-                      <button className="mt-2 text-sm text-blue-600 font-semibold hover:text-blue-700">
-                        Continue →
-                      </button>
+                    <div className="flex items-start space-x-4">
+                      <img
+                        src={enrollment.courses.thumbnail || 'https://via.placeholder.com/96'}
+                        alt={enrollment.courses.title}
+                        className="w-24 h-24 object-cover rounded flex-shrink-0"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-1">{enrollment.courses.title}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {enrollment.courses.short_description}
+                        </p>
+                      </div>
                     </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full pt-2">
+                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                            <span>Progress</span>
+                            <span className="font-semibold">{enrollment.progress_percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                                className="bg-blue-600 h-2 rounded-full transition-all"
+                                style={{ width: `${enrollment.progress_percentage}%` }}
+                            ></div>
+                        </div>
+                    </div>
+
+                    <button className="mt-2 text-sm text-blue-600 font-semibold hover:text-blue-700 self-start">
+                      Continue →
+                    </button>
                   </Link>
                 ))}
               </div>
