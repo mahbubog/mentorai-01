@@ -7,7 +7,6 @@ import { ProfileRow, ProfilesUpdate } from '../../lib/database.types';
 
 export function ProfilePage() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -32,12 +31,11 @@ export function ProfilePage() {
         .maybeSingle();
 
       if (data) {
-        // data is correctly typed as ProfileRow here
-        setProfile(data);
+        const profileData = data as ProfileRow;
         setFormData({
-          full_name: data.full_name || '',
-          phone: data.phone || '',
-          bio: data.bio || '',
+          full_name: profileData.full_name || '',
+          phone: profileData.phone || '',
+          bio: profileData.bio || '',
         });
       }
     } catch (error) {
@@ -61,7 +59,7 @@ export function ProfilePage() {
 
       const { error } = await supabase
         .from('profiles')
-        .update([updatePayload]) // Wrap in array
+        .update([updatePayload])
         .eq('id', user!.id);
 
       if (error) throw error;
