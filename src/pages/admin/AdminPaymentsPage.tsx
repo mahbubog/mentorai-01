@@ -3,6 +3,7 @@ import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert } from '../../lib/database.types';
 
 export function AdminPaymentsPage() {
   const { user } = useAuth();
@@ -43,31 +44,37 @@ export function AdminPaymentsPage() {
     if (!confirm('Are you sure you want to approve this payment?')) return;
 
     try {
+      const paymentUpdate: PaymentsUpdate = {
+        status: 'approved',
+        approved_by: user!.id,
+        approved_at: new Date().toISOString(),
+      };
+
       const { error: paymentError } = await supabase
         .from('payments')
-        .update({
-          status: 'approved',
-          approved_by: user!.id,
-          approved_at: new Date().toISOString(),
-        })
+        .update([paymentUpdate])
         .eq('id', paymentId);
 
       if (paymentError) throw paymentError;
 
-      const { error: enrollmentError } = await supabase.from('enrollments').insert({
+      const enrollmentData: EnrollmentsInsert = {
         user_id: userId,
         course_id: courseId,
         payment_id: paymentId,
-      });
+      };
+
+      const { error: enrollmentError } = await supabase.from('enrollments').insert([enrollmentData]);
 
       if (enrollmentError) throw enrollmentError;
 
-      await supabase.from('notifications').insert({
+      const notificationData: NotificationsInsert = {
         user_id: userId,
         title: 'Payment Approved',
         message: 'Your payment has been approved. You can now access the course.',
         type: 'payment',
-      });
+      };
+
+      await supabase.from('notifications').insert([notificationData]);
 
       alert('Payment approved successfully!');
       loadPayments();
@@ -82,22 +89,26 @@ export function AdminPaymentsPage() {
     if (!reason) return;
 
     try {
+      const paymentUpdate: PaymentsUpdate = {
+        status: 'rejected',
+        rejection_reason: reason,
+      };
+
       const { error } = await supabase
         .from('payments')
-        .update({
-          status: 'rejected',
-          rejection_reason: reason,
-        })
+        .update([paymentUpdate])
         .eq('id', paymentId);
 
       if (error) throw error;
 
-      await supabase.from('notifications').insert({
+      const notificationData: NotificationsInsert = {
         user_id: userId,
         title: 'Payment Rejected',
         message: `Your payment was rejected. Reason: ${reason}`,
         type: 'payment',
-      });
+      };
+
+      await supabase.from('notifications').insert([notificationData]);
 
       alert('Payment rejected successfully!');
       loadPayments();

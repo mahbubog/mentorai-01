@@ -4,14 +4,28 @@ import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { CheckCircle, Circle, ChevronRight } from 'lucide-react';
+import { CourseRow, LessonProgressInsert, LessonProgressRow } from '../../lib/database.types';
+
+interface Lesson {
+  id: string;
+  title: string;
+  duration: string | null;
+  video_url: string;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  course_lessons: Lesson[];
+}
 
 export function CoursePlayerPage() {
-  const { courseId } = useParams();
+  const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
-  const [course, setCourse] = useState<any>(null);
-  const [sections, setSections] = useState<any[]>([]);
-  const [currentLesson, setCurrentLesson] = useState<any>(null);
-  const [progress, setProgress] = useState<any>({});
+  const [course, setCourse] = useState<CourseRow | null>(null);
+  const [sections, setSections] = useState<Section[]>([]);
+  const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
+  const [progress, setProgress] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +39,7 @@ export function CoursePlayerPage() {
       const { data: courseData } = await supabase
         .from('courses')
         .select('*')
-        .eq('id', courseId)
+        .eq('id', courseId!)
         .maybeSingle();
 
       const { data: sectionsData } = await supabase
@@ -34,7 +48,7 @@ export function CoursePlayerPage() {
           *,
           course_lessons (*)
         `)
-        .eq('course_id', courseId)
+        .eq('course_id', courseId!)
         .order('display_order');
 
       const { data: progressData } = await supabase
@@ -43,16 +57,17 @@ export function CoursePlayerPage() {
         .eq('user_id', user!.id);
 
       setCourse(courseData);
-      setSections(sectionsData || []);
+      setSections((sectionsData || []) as Section[]);
 
-      const progressMap: any = {};
-      progressData?.forEach((p) => {
+      const progressMap: Record<string, boolean> = {};
+      (progressData as LessonProgressRow[])?.forEach((p) => {
         progressMap[p.lesson_id] = p.completed;
       });
       setProgress(progressMap);
 
-      if (sectionsData && sectionsData[0]?.course_lessons?.[0]) {
-        setCurrentLesson(sectionsData[0].course_lessons[0]);
+      const firstLesson = (sectionsData as Section[])?.[0]?.course_lessons?.[0];
+      if (firstLesson) {
+        setCurrentLesson(firstLesson);
       }
     } catch (error) {
       console.error('Error loading course:', error);
@@ -63,12 +78,14 @@ export function CoursePlayerPage() {
 
   const markLessonComplete = async (lessonId: string) => {
     try {
-      const { error } = await supabase.from('lesson_progress').upsert({
+      const upsertData: LessonProgressInsert = {
         user_id: user!.id,
         lesson_id: lessonId,
         completed: true,
         completed_at: new Date().toISOString(),
-      });
+      };
+
+      const { error } = await supabase.from('lesson_progress').upsert([upsertData]);
 
       if (!error) {
         setProgress({ ...progress, [lessonId]: true });
@@ -124,7 +141,7 @@ export function CoursePlayerPage() {
               <div key={section.id} className="mb-6">
                 <h3 className="font-bold text-gray-900 mb-3">{section.title}</h3>
                 <div className="space-y-2">
-                  {section.course_lessons?.map((lesson: any) => (
+                  {section.course_lessons?.map((lesson: Lesson) => (
                     <button
                       key={lesson.id}
                       onClick={() => setCurrentLesson(lesson)}

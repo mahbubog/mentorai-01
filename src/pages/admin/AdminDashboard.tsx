@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Users, BookOpen, DollarSign, Clock } from 'lucide-react';
+import { PaymentRow } from '../../lib/database.types';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -39,7 +40,7 @@ export function AdminDashboard() {
         .select('amount')
         .eq('status', 'approved');
 
-      const revenue = approvedPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      const revenue = (approvedPayments as PaymentRow[] | null)?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
 
       const { data: payments } = await supabase
         .from('payments')

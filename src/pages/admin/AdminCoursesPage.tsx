@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Pencil, Trash2, Eye } from 'lucide-react';
+import { CoursesUpdate } from '../../lib/database.types';
 
 export function AdminCoursesPage() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -46,11 +47,15 @@ export function AdminCoursesPage() {
 
   const toggleStatus = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+    
+    const updatePayload: CoursesUpdate = {
+      status: newStatus as CoursesUpdate['status'],
+    };
 
     try {
       const { error } = await supabase
         .from('courses')
-        .update({ status: newStatus })
+        .update([updatePayload])
         .eq('id', id);
 
       if (error) throw error;

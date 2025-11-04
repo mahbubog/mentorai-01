@@ -4,6 +4,11 @@ import { UserLayout } from '../../components/UserLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { BookOpen, Clock, Award, AlertCircle } from 'lucide-react';
+import { EnrollmentRow, CourseRow } from '../../lib/database.types';
+
+interface EnrollmentWithCourse extends EnrollmentRow {
+  courses: CourseRow;
+}
 
 export function UserDashboard() {
   const { user } = useAuth();
@@ -13,7 +18,7 @@ export function UserDashboard() {
     completed: 0,
     pendingPayments: 0,
   });
-  const [recentCourses, setRecentCourses] = useState<any[]>([]);
+  const [recentCourses, setRecentCourses] = useState<CourseRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,19 +45,21 @@ export function UserDashboard() {
         .eq('user_id', user.id)
         .eq('status', 'pending');
 
-      const completed = enrollments?.filter((e) => e.progress_percentage === 100).length || 0;
-      const inProgress = enrollments?.filter(
+      const typedEnrollments = (enrollments || []) as EnrollmentWithCourse[];
+
+      const completed = typedEnrollments.filter((e) => e.progress_percentage === 100).length || 0;
+      const inProgress = typedEnrollments.filter(
         (e) => e.progress_percentage > 0 && e.progress_percentage < 100
       ).length || 0;
 
       setStats({
-        totalCourses: enrollments?.length || 0,
+        totalCourses: typedEnrollments.length || 0,
         inProgress,
         completed,
         pendingPayments: payments?.length || 0,
       });
 
-      setRecentCourses(enrollments?.map((e) => e.courses) || []);
+      setRecentCourses(typedEnrollments.map((e) => e.courses) || []);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -132,7 +139,7 @@ export function UserDashboard() {
                     className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow transition"
                   >
                     <img
-                      src={course.thumbnail}
+                      src={course.thumbnail || 'https://via.placeholder.com/96'}
                       alt={course.title}
                       className="w-24 h-24 object-cover rounded"
                     />

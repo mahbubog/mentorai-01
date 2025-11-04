@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { PaymentsInsert } from '../lib/database.types';
 
 interface PaymentModalProps {
   course: any;
@@ -30,18 +31,20 @@ export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) 
     try {
       const price = course.discount_price || course.price;
 
-      const { error: paymentError } = await supabase.from('payments').insert({
+      const paymentData: PaymentsInsert = {
         user_id: user!.id,
         course_id: course.id,
         amount: price,
-        payment_method: formData.payment_method,
+        payment_method: formData.payment_method as PaymentsInsert['payment_method'],
         payment_number: formData.payment_number,
         transaction_id: formData.transaction_id,
         billing_name: formData.billing_name,
         billing_email: formData.billing_email,
         billing_phone: formData.billing_phone,
         status: 'pending',
-      });
+      };
+
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
 
       if (paymentError) throw paymentError;
 

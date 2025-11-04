@@ -3,14 +3,29 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { Clock, Users, Award, BookOpen, CheckCircle, Star, Download, Smartphone, Lock, Calendar, Globe, TrendingUp } from 'lucide-react';
+import { Clock, Users, Award, BookOpen, CheckCircle, Star, Download, Smartphone, Lock, Calendar, Globe } from 'lucide-react';
 import { PaymentModal } from '../../components/PaymentModal';
+import { CourseRow } from '../../lib/database.types';
+
+// Define a type for the course data including related tables
+interface CourseDetails extends CourseRow {
+  instructors: {
+    id: string;
+    name: string;
+    bio: string | null;
+    photo: string | null;
+  } | null;
+  course_requirements: { requirement: string }[];
+  course_learning_outcomes: { outcome: string }[];
+  // Added missing property
+  target_audience: string | null; 
+}
 
 export function CourseDetailsPage() {
-  const { slug } = useParams();
+  const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<CourseDetails | null>(null);
   const [sections, setSections] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -35,7 +50,7 @@ export function CourseDetailsPage() {
           course_requirements (requirement),
           course_learning_outcomes (outcome)
         `)
-        .eq('slug', slug)
+        .eq('slug', slug!)
         .eq('status', 'published')
         .maybeSingle();
 
@@ -45,16 +60,18 @@ export function CourseDetailsPage() {
         return;
       }
 
-      setCourse(courseData);
+      // Explicitly cast data to CourseDetails
+      const typedCourseData = courseData as unknown as CourseDetails;
+      setCourse(typedCourseData);
 
-      if (courseData.course_type === 'recorded') {
+      if (typedCourseData.course_type === 'recorded') {
         const { data: sectionsData } = await supabase
           .from('course_sections')
           .select(`
             *,
             course_lessons (*)
           `)
-          .eq('course_id', courseData.id)
+          .eq('course_id', typedCourseData.id)
           .order('display_order');
 
         setSections(sectionsData || []);
@@ -63,7 +80,7 @@ export function CourseDetailsPage() {
       const { data: reviewsData } = await supabase
         .from('course_reviews')
         .select('*')
-        .eq('course_id', courseData.id)
+        .eq('course_id', typedCourseData.id)
         .order('created_at', { ascending: false });
 
       setReviews(reviewsData || []);
@@ -73,7 +90,7 @@ export function CourseDetailsPage() {
           .from('enrollments')
           .select('id')
           .eq('user_id', user.id)
-          .eq('course_id', courseData.id)
+          .eq('course_id', typedCourseData.id)
           .maybeSingle();
 
         setIsEnrolled(!!enrollmentData);
@@ -92,7 +109,7 @@ export function CourseDetailsPage() {
     }
 
     if (isEnrolled) {
-      navigate(`/learn/${course.id}`);
+      navigate(`/learn/${course!.id}`);
       return;
     }
 
@@ -113,7 +130,7 @@ export function CourseDetailsPage() {
   if (!course) return null;
 
   const price = course.discount_price || course.price;
-  const levelMap = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
+  const levelMap = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
   const formattedDate = course.updated_at ? new Date(course.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
 
   const sortedReviews = [...reviews].sort((a, b) => {
@@ -159,14 +176,14 @@ export function CourseDetailsPage() {
                   <Clock className="h-6 w-6 text-blue-400" />
                   <div>
                     <p className="text-gray-400 text-sm">Duration</p>
-                    <p className="font-bold text-lg">{course.duration_hours || 10}h</p>
+                    <p className="font-bold text-lg">{course.duration || 10}h</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <BookOpen className="h-6 w-6 text-blue-400" />
                   <div>
                     <p className="text-gray-400 text-sm">Level</p>
-                    <p className="font-bold text-lg">{levelMap[course.difficulty_level as keyof typeof levelMap] || 'N/A'}</p>
+                    <p className="font-bold text-lg">{levelMap[course.difficulty_level] || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -198,10 +215,10 @@ export function CourseDetailsPage() {
                 <div className="space-y-4 text-sm mb-6 pb-6 border-b border-gray-200">
                   <h3 className="font-bold text-gray-900">This course includes:</h3>
 
-                  {course.duration_hours && (
+                  {course.duration && (
                     <div className="flex items-center">
                       <Clock className="h-5 w-5 text-blue-600 mr-3" />
-                      <span>{course.duration_hours}+ hours of content</span>
+                      <span>{course.duration}+ hours of content</span>
                     </div>
                   )}
 
@@ -212,7 +229,7 @@ export function CourseDetailsPage() {
                     </div>
                   )}
 
-                  {course.includes_downloadable_resources && (
+                  {course.includes_resources && (
                     <div className="flex items-center">
                       <Download className="h-5 w-5 text-green-600 mr-3" />
                       <span>Downloadable resources</span>
@@ -279,7 +296,7 @@ export function CourseDetailsPage() {
               <div className="space-y-8">
                 <div className="bg-white rounded-xl shadow p-8">
                   <h2 className="text-2xl font-bold mb-4">About this course</h2>
-                  <p className="text-gray-700 leading-relaxed mb-6">{course.long_description || course.short_description}</p>
+                  <p className="text-gray-700 leading-relaxed mb-6">{course.full_description || course.short_description}</p>
 
                   <h3 className="text-xl font-bold mb-4 mt-8">What you'll learn</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -322,7 +339,7 @@ export function CourseDetailsPage() {
                         <h3 className="font-bold text-lg text-gray-900 mb-2">{section.title}</h3>
                         <p className="text-gray-600 text-sm mb-6">{section.description}</p>
                         <div className="space-y-3">
-                          {section.course_lessons?.map((lesson: any, idx: number) => (
+                          {section.course_lessons?.map((lesson: any) => (
                             <div key={lesson.id} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                               <span className="flex items-center text-gray-700 font-medium">
                                 {!isEnrolled && <Lock className="h-4 w-4 mr-3 text-gray-400" />}

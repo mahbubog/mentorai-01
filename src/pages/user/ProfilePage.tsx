@@ -3,14 +3,15 @@ import { UserLayout } from '../../components/UserLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { User, Mail, Phone } from 'lucide-react';
+import { ProfileRow, ProfilesUpdate } from '../../lib/database.types';
 
 export function ProfilePage() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfilesUpdate>({
     full_name: '',
     phone: '',
     bio: '',
@@ -31,6 +32,7 @@ export function ProfilePage() {
         .maybeSingle();
 
       if (data) {
+        // data is correctly typed as ProfileRow here
         setProfile(data);
         setFormData({
           full_name: data.full_name || '',
@@ -51,9 +53,15 @@ export function ProfilePage() {
     setMessage('');
 
     try {
+      const updatePayload: ProfilesUpdate = {
+        full_name: formData.full_name,
+        phone: formData.phone,
+        bio: formData.bio,
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .update(formData)
+        .update([updatePayload]) // Wrap in array
         .eq('id', user!.id);
 
       if (error) throw error;
@@ -103,7 +111,7 @@ export function ProfilePage() {
               </label>
               <input
                 type="text"
-                value={formData.full_name}
+                value={formData.full_name || ''}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -130,7 +138,7 @@ export function ProfilePage() {
               </label>
               <input
                 type="tel"
-                value={formData.phone}
+                value={formData.phone || ''}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -141,7 +149,7 @@ export function ProfilePage() {
                 Bio
               </label>
               <textarea
-                value={formData.bio}
+                value={formData.bio || ''}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 rows={4}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

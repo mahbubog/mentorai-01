@@ -285,6 +285,32 @@ export interface Database {
           created_at?: string
         }
       }
+      lesson_progress: {
+        Row: {
+          id: string
+          user_id: string
+          lesson_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          lesson_id: string
+          completed: boolean
+          completed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          lesson_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -297,3 +323,18 @@ export interface Database {
     }
   }
 }
+
+export type ProfilesInsert = Database['public']['Tables']['profiles']['Insert'];
+export type PaymentsInsert = Database['public']['Tables']['payments']['Insert'];
+export type PaymentsUpdate = Database['public']['Tables']['payments']['Update'];
+export type EnrollmentsInsert = Database['public']['Tables']['enrollments']['Insert'];
+export type NotificationsInsert = Database['public']['Tables']['notifications']['Insert'];
+export type CoursesUpdate = Database['public']['Tables']['courses']['Update'];
+export type LessonProgressInsert = Database['public']['Tables']['lesson_progress']['Insert'];
+export type ProfilesUpdate = Database['public']['Tables']['profiles']['Update'];
+
+export type CourseRow = Database['public']['Tables']['courses']['Row'];
+export type PaymentRow = Database['public']['Tables']['payments']['Row'];
+export type EnrollmentRow = Database['public']['Tables']['enrollments']['Row'];
+export type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+export type LessonProgressRow = Database['public']['Tables']['lesson_progress']['Row'];

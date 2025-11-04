@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { ProfilesInsert } from '../lib/database.types';
 
 interface AuthContextType {
   user: User | null;
@@ -65,11 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
 
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
+      const profileData: ProfilesInsert = {
         id: data.user.id,
         full_name: fullName,
-        phone,
-      });
+        phone: phone,
+      };
+      const { error: profileError } = await supabase.from('profiles').insert([profileData]);
 
       if (profileError) throw profileError;
     }
