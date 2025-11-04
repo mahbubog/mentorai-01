@@ -7,7 +7,7 @@ interface PrivateRouteProps {
 }
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isVerified } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,6 +19,11 @@ export function PrivateRoute({ children }: PrivateRouteProps) {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  
+  // Redirect unverified users to the verification page
+  if (!isVerified) {
+    return <Navigate to="/verify-email" replace />;
   }
 
   return <>{children}</>;

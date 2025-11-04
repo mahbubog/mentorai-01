@@ -54,7 +54,7 @@ export function AdminCoursesPage() {
 
     try {
       const { error } = await supabase
-        .from<'courses'>('courses')
+        .from('courses')
         .update([updatePayload])
         .eq('id', id);
 
