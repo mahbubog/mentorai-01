@@ -59,7 +59,7 @@ export function ProfilePage() {
 
       const { error } = await supabase
         .from('profiles')
-        .update([updatePayload])
+        .update([updatePayload] as ProfilesUpdate[])
         .eq('id', user!.id);
 
       if (error) throw error;

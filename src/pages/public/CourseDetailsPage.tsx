@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Clock, Users, Award, BookOpen, CheckCircle, Star, Download, Smartphone, Lock, Calendar, Globe } from 'lucide-react';
 import { PaymentModal } from '../../components/PaymentModal';
+import { PaymentSuccessModal } from '../../components/PaymentSuccessModal';
 import { CourseRow } from '../../lib/database.types';
 
 // Define a type for the course data including related tables
@@ -39,6 +40,7 @@ export function CourseDetailsPage() {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // New state for success modal
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'instructor' | 'reviews'>('overview');
   const [reviewSort, setReviewSort] = useState<'recent' | 'highest' | 'lowest'>('recent');
   const [totalLessons, setTotalLessons] = useState(0);
@@ -137,6 +139,11 @@ export function CourseDetailsPage() {
     }
 
     setShowPaymentModal(true);
+  };
+
+  const handlePaymentSubmitted = () => {
+    setShowPaymentModal(false);
+    setShowSuccessModal(true);
   };
 
   if (loading) {
@@ -506,11 +513,12 @@ export function CourseDetailsPage() {
         <PaymentModal
           course={course}
           onClose={() => setShowPaymentModal(false)}
-          onSuccess={() => {
-            setShowPaymentModal(false);
-            loadCourseDetails();
-          }}
+          onPaymentSubmitted={handlePaymentSubmitted}
         />
+      )}
+
+      {showSuccessModal && (
+        <PaymentSuccessModal onClose={() => setShowSuccessModal(false)} />
       )}
     </div>
   );

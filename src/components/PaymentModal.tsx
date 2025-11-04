@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, Calendar, Clock, DollarSign, AlertCircle } from 'lucide-react';
+import { X, Upload, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { PaymentsInsert, ProfileRow } from '../lib/database.types';
@@ -9,7 +9,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 interface PaymentModalProps {
   course: any;
   onClose: () => void;
-  onSuccess: () => void;
+  onPaymentSubmitted: () => void; // New prop for handling submission success
 }
 
 const PAYMENT_ACCOUNTS: Record<string, string> = {
@@ -20,12 +20,11 @@ const PAYMENT_ACCOUNTS: Record<string, string> = {
   other: 'Contact support for details',
 };
 
-export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) {
+export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
 
@@ -58,11 +57,11 @@ export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) 
         .maybeSingle();
 
       if (data) {
-        setProfile(data as ProfileRow);
+        const profileData = data as ProfileRow;
         setFormData((prev) => ({
           ...prev,
-          billing_name: data.full_name || '',
-          billing_phone: data.phone || '',
+          billing_name: profileData.full_name || '',
+          billing_phone: profileData.phone || '',
         }));
       }
     } catch (error) {
@@ -90,7 +89,7 @@ export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) 
     const fileName = `${user!.id}/${course.id}/${Date.now()}.${fileExt}`;
     const filePath = `payment_screenshots/${fileName}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('course_assets')
       .upload(filePath, file);
 
@@ -141,12 +140,12 @@ export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) 
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData] as PaymentsInsert[]);
 
       if (paymentError) throw paymentError;
 
-      alert('Payment submitted successfully! Admin will review your payment within 24 hours.');
-      onSuccess();
+      // Success: Close payment modal and trigger success handler in parent
+      onPaymentSubmitted();
     } catch (err: any) {
       setError(err.message || 'Failed to submit payment');
     } finally {
@@ -357,7 +356,7 @@ export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) 
                   </label>
                   <DatePicker
                     selected={paymentDate}
-                    onChange={(date: Date) => setPaymentDate(date)}
+                    onChange={(date: Date | null) => date && setPaymentDate(date)}
                     showTimeSelect
                     dateFormat="Pp"
                     required
