@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true); // Default to true for persistent session
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
@@ -17,6 +18,8 @@ export function LoginPage() {
     setLoading(true);
 
     try {
+      // Note: Supabase handles session persistence based on the client configuration.
+      // The 'rememberMe' state is primarily for UX indication here.
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err: any) {
@@ -72,6 +75,31 @@ export function LoginPage() {
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
               placeholder="Enter your password"
             />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Remember me
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-blue-600 hover:text-blue-700"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <button

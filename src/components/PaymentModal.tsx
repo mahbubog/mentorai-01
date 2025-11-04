@@ -44,7 +44,7 @@ export function PaymentModal({ course, onClose, onSuccess }: PaymentModalProps) 
         status: 'pending',
       };
 
-      const { error: paymentError } = await supabase.from<'payments'>('payments').insert([paymentData]);
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
 
       if (paymentError) throw paymentError;
 
