@@ -17,8 +17,15 @@ interface CourseDetails extends CourseRow {
   } | null;
   course_requirements: { requirement: string }[];
   course_learning_outcomes: { outcome: string }[];
-  // Added missing property
-  target_audience: string | null; 
+  target_audience: string | null;
+}
+
+interface ReviewWithProfile {
+  id: string;
+  rating: number;
+  review: string | null;
+  created_at: string;
+  profiles: { full_name: string } | null;
 }
 
 export function CourseDetailsPage() {
@@ -27,18 +34,24 @@ export function CourseDetailsPage() {
   const navigate = useNavigate();
   const [course, setCourse] = useState<CourseDetails | null>(null);
   const [sections, setSections] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'instructor' | 'reviews'>('overview');
   const [reviewSort, setReviewSort] = useState<'recent' | 'highest' | 'lowest'>('recent');
+  const [totalLessons, setTotalLessons] = useState(0);
 
   useEffect(() => {
     if (slug) {
       loadCourseDetails();
     }
   }, [slug, user]);
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+    return `https://www.youtube.com/embed/${videoId}`;
+  };
 
   const loadCourseDetails = async () => {
     try {
@@ -60,10 +73,10 @@ export function CourseDetailsPage() {
         return;
       }
 
-      // Explicitly cast data to CourseDetails
       const typedCourseData = courseData as unknown as CourseDetails;
       setCourse(typedCourseData);
 
+      let lessonCount = 0;
       if (typedCourseData.course_type === 'recorded') {
         const { data: sectionsData } = await supabase
           .from('course_sections')
@@ -74,16 +87,24 @@ export function CourseDetailsPage() {
           .eq('course_id', typedCourseData.id)
           .order('display_order');
 
-        setSections(sectionsData || []);
+        const sectionsArray = sectionsData || [];
+        setSections(sectionsArray);
+        // Fix for TS2339: Explicitly type 's' in reduce function or cast sectionsArray
+        lessonCount = sectionsArray.reduce((acc, s: any) => acc + (s.course_lessons?.length || 0), 0) || 0;
       }
+      setTotalLessons(lessonCount);
 
       const { data: reviewsData } = await supabase
         .from('course_reviews')
-        .select('*')
+        .select(`
+          *,
+          profiles (full_name)
+        `)
         .eq('course_id', typedCourseData.id)
+        .eq('status', 'approved') // Only show approved reviews
         .order('created_at', { ascending: false });
 
-      setReviews(reviewsData || []);
+      setReviews((reviewsData || []) as ReviewWithProfile[]);
 
       if (user) {
         const { data: enrollmentData } = await supabase
@@ -140,7 +161,7 @@ export function CourseDetailsPage() {
     return 0;
   });
 
-  const otherInstructorCourses = course.instructors?.id ? 1 : 0;
+  const otherInstructorCourses = course.instructors?.id ? 1 : 0; // Placeholder count
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -163,6 +184,27 @@ export function CourseDetailsPage() {
 
               <h1 className="text-5xl font-bold mb-4 leading-tight">{course.title}</h1>
               <p className="text-xl text-gray-200 mb-8">{course.short_description}</p>
+
+              {/* Course Preview Video/Thumbnail */}
+              <div className="mt-8 mb-8">
+                {course.preview_video ? (
+                  <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+                    <iframe
+                      src={getYouTubeEmbedUrl(course.preview_video)}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={course.thumbnail || 'https://images.pexels.com/photos/1438072/pexels-photo-1438072.jpeg'}
+                    alt={course.title}
+                    className="w-full h-96 object-cover rounded-xl shadow-2xl"
+                  />
+                )}
+              </div>
+              {/* End Course Preview */}
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-t border-gray-700">
                 <div className="flex items-center gap-3">
@@ -196,6 +238,7 @@ export function CourseDetailsPage() {
               </div>
             </div>
 
+            {/* Sticky Sidebar */}
             <div>
               <div className="bg-white text-gray-900 rounded-xl shadow-2xl p-8 sticky top-24">
                 <div className="mb-8">
@@ -215,18 +258,34 @@ export function CourseDetailsPage() {
                 <div className="space-y-4 text-sm mb-6 pb-6 border-b border-gray-200">
                   <h3 className="font-bold text-gray-900">This course includes:</h3>
 
-                  {course.duration && (
-                    <div className="flex items-center">
-                      <Clock className="h-5 w-5 text-blue-600 mr-3" />
-                      <span>{course.duration}+ hours of content</span>
-                    </div>
-                  )}
-
-                  {sections.length > 0 && (
-                    <div className="flex items-center">
-                      <BookOpen className="h-5 w-5 text-blue-600 mr-3" />
-                      <span>{sections.reduce((acc: number, s: any) => acc + (s.course_lessons?.length || 0), 0)} lessons</span>
-                    </div>
+                  {course.course_type === 'recorded' ? (
+                    <>
+                      <div className="flex items-center">
+                        <Clock className="h-5 w-5 text-blue-600 mr-3" />
+                        <span>{course.duration || 10} hours of content</span>
+                      </div>
+                      <div className="flex items-center">
+                        <BookOpen className="h-5 w-5 text-blue-600 mr-3" />
+                        <span>{totalLessons} lessons</span>
+                      </div>
+                      {course.includes_lifetime_access && (
+                        <div className="flex items-center">
+                          <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                          <span>Lifetime access</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center">
+                        <Calendar className="h-5 w-5 text-blue-600 mr-3" />
+                        <span>Start Date: {course.start_date ? new Date(course.start_date).toLocaleDateString() : 'TBD'}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-5 w-5 text-blue-600 mr-3" />
+                        <span>Duration: {course.duration || 'N/A'}</span>
+                      </div>
+                    </>
                   )}
 
                   {course.includes_resources && (
@@ -240,13 +299,6 @@ export function CourseDetailsPage() {
                     <div className="flex items-center">
                       <Award className="h-5 w-5 text-green-600 mr-3" />
                       <span>Certificate of completion</span>
-                    </div>
-                  )}
-
-                  {course.includes_lifetime_access && (
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
-                      <span>Lifetime access</span>
                     </div>
                   )}
 
@@ -266,6 +318,7 @@ export function CourseDetailsPage() {
                 )}
               </div>
             </div>
+            {/* End Sticky Sidebar */}
           </div>
         </div>
       </div>
@@ -417,11 +470,11 @@ export function CourseDetailsPage() {
                     </div>
 
                     <div className="space-y-6">
-                      {sortedReviews.map((review: any) => (
+                      {sortedReviews.map((review) => (
                         <div key={review.id} className="pb-6 border-b last:border-b-0">
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <p className="font-semibold text-gray-900">{review.student_name || 'Student'}</p>
+                              <p className="font-semibold text-gray-900">{review.profiles?.full_name || 'Student'}</p>
                               <p className="text-sm text-gray-500">{new Date(review.created_at).toLocaleDateString()}</p>
                             </div>
                             <div className="flex items-center gap-1">
@@ -430,7 +483,7 @@ export function CourseDetailsPage() {
                               ))}
                             </div>
                           </div>
-                          <p className="text-gray-700">{review.comment}</p>
+                          <p className="text-gray-700">{review.review}</p>
                         </div>
                       ))}
                     </div>
