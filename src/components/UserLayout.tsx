@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Header } from './Header';
+import { UserHeader } from './UserHeader';
 import { LayoutDashboard, BookOpen, CreditCard, User } from 'lucide-react';
 
 interface UserLayoutProps {
@@ -19,7 +19,7 @@ export function UserLayout({ children }: UserLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <UserHeader />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           <aside className="w-full md:w-64 flex-shrink-0">
