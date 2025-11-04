@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function UpdatePasswordPage() {
-  const { session } = useAuth();
+  const { session, isLoading } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,12 +16,11 @@ export function UpdatePasswordPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // If there is no session, the user likely didn't come from the reset link.
-    // We wait for the AuthProvider to load the session first.
-    if (session === null) {
+    // Only check for error if loading is complete AND session is null
+    if (!isLoading && session === null) {
       setError('Invalid or expired password reset link. Please request a new one.');
     }
-  }, [session]);
+  }, [session, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,9 +80,14 @@ export function UpdatePasswordPage() {
           </div>
         )}
 
-        {session === null && !error ? (
+        {isLoading ? (
           <div className="text-center p-6 text-gray-500">
-            Loading session... If this persists, the link may be invalid.
+            Loading session...
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mt-4"></div>
+          </div>
+        ) : session === null ? (
+          <div className="text-center p-6 text-gray-500">
+            {/* Error message is already displayed above */}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
