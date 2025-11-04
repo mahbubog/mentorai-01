@@ -7,6 +7,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { AdminLoginPage } from './pages/auth/AdminLoginPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { UpdatePasswordPage } from './pages/auth/UpdatePasswordPage';
 import { UserDashboard } from './pages/user/UserDashboard';
 import { MyCoursesPage } from './pages/user/MyCoursesPage';
 import { PaymentHistoryPage } from './pages/user/PaymentHistoryPage';
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/update-password" element={<UpdatePasswordPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
 
           <Route
