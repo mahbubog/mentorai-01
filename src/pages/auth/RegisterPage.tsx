@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GraduationCap, CheckCircle, AlertCircle, Eye, EyeOff, Upload } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { EmailSentModal } from '../../components/EmailSentModal';
 
 export function RegisterPage() {
   const [fullName, setFullName] = useState('');
@@ -16,6 +17,7 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -135,12 +137,18 @@ export function RegisterPage() {
 
     try {
       await signUp(email, password, fullName, phone);
-      navigate('/dashboard');
+      // Show success modal instead of navigating to dashboard
+      setShowSuccessModal(true);
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigate('/login');
   };
 
   return (
@@ -419,6 +427,10 @@ export function RegisterPage() {
           </p>
         </div>
       </div>
+      
+      {showSuccessModal && (
+        <EmailSentModal email={email} onClose={handleModalClose} />
+      )}
     </div>
   );
 }
