@@ -57,6 +57,7 @@ export function NotificationDropdown() {
 
   const markAsRead = async (id: string) => {
     try {
+      // FIX 3: Pass single object instead of array
       await supabase
         .from('notifications' as const)
         .update({ is_read: true })

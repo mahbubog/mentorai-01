@@ -140,7 +140,8 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      const { error: paymentError } = await supabase.from('payments' as const).insert([paymentData]);
+      // FIX 2: Remove array wrapper
+      const { error: paymentError } = await supabase.from('payments' as const).insert(paymentData);
 
       if (paymentError) throw paymentError;
 

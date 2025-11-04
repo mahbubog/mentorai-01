@@ -85,7 +85,8 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from('lesson_progress' as const).upsert([upsertData]);
+      // FIX 5: Remove array wrapper
+      const { error } = await supabase.from('lesson_progress' as const).upsert(upsertData);
 
       if (!error) {
         setProgress({ ...progress, [lessonId]: true });

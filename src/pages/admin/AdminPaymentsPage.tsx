@@ -50,9 +50,10 @@ export function AdminPaymentsPage() {
         approved_at: new Date().toISOString(),
       };
 
+      // FIX 7: Remove array wrapper
       const { error: paymentError } = await supabase
         .from('payments' as const)
-        .update([paymentUpdate])
+        .update(paymentUpdate)
         .eq('id', paymentId);
 
       if (paymentError) throw paymentError;
@@ -63,7 +64,8 @@ export function AdminPaymentsPage() {
         payment_id: paymentId,
       };
 
-      const { error: enrollmentError } = await supabase.from('enrollments' as const).insert([enrollmentData]);
+      // FIX 8: Remove array wrapper
+      const { error: enrollmentError } = await supabase.from('enrollments' as const).insert(enrollmentData);
 
       if (enrollmentError) throw enrollmentError;
 
@@ -74,7 +76,8 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      await supabase.from('notifications' as const).insert([notificationData]);
+      // FIX 9: Remove array wrapper
+      await supabase.from('notifications' as const).insert(notificationData);
 
       alert('Payment approved successfully!');
       loadPayments();
@@ -94,9 +97,10 @@ export function AdminPaymentsPage() {
         rejection_reason: reason,
       };
 
+      // FIX 10: Remove array wrapper
       const { error } = await supabase
         .from('payments' as const)
-        .update([paymentUpdate])
+        .update(paymentUpdate)
         .eq('id', paymentId);
 
       if (error) throw error;
@@ -108,7 +112,8 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      await supabase.from('notifications' as const).insert([notificationData]);
+      // FIX 11: Remove array wrapper
+      await supabase.from('notifications' as const).insert(notificationData);
 
       alert('Payment rejected successfully!');
       loadPayments();

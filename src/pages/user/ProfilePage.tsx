@@ -57,9 +57,10 @@ export function ProfilePage() {
         bio: formData.bio,
       };
 
+      // FIX 4: Remove array wrapper
       const { error } = await supabase
         .from('profiles' as const)
-        .update([updatePayload])
+        .update(updatePayload)
         .eq('id', user!.id);
 
       if (error) throw error;
