@@ -58,7 +58,7 @@ export function ProfilePage() {
       };
 
       const { error } = await supabase
-        .from('profiles')
+        .from<'profiles'>('profiles')
         .update([updatePayload])
         .eq('id', user!.id);
 
