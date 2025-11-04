@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,6 +32,7 @@ export function CourseDetailsPage() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [course, setCourse] = useState<CourseDetails | null>(null);
   const [sections, setSections] = useState<any[]>([]);
   const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
@@ -125,7 +126,8 @@ export function CourseDetailsPage() {
 
   const handleEnroll = () => {
     if (!user) {
-      navigate('/login');
+      // Redirect to login, passing the current path so the user returns here
+      navigate('/login', { state: { from: location.pathname } });
       return;
     }
 

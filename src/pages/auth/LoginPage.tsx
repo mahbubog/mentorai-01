@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GraduationCap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -11,6 +11,8 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,8 @@ export function LoginPage() {
       // Note: Supabase handles session persistence based on the client configuration.
       // The 'rememberMe' state is primarily for UX indication here.
       await signIn(email, password);
-      navigate('/dashboard');
+      // Redirect user back to the page they came from (e.g., course details) or dashboard
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
