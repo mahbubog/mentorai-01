@@ -59,7 +59,7 @@ export function NotificationDropdown() {
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ is_read: true }) // Removed 'as NotificationsUpdate' as it's now correctly inferred
+        .update({ is_read: true } as NotificationsUpdate) // Explicitly cast to NotificationsUpdate
         .eq('id', id);
       
       if (error) throw error;

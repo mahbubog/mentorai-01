@@ -107,7 +107,7 @@ export function PersonalInformationTab() {
 
       const { error: updateError } = await supabase
         .from('profiles')
-        .update(updatePayload) // Removed 'as ProfilesUpdate' as it's now correctly inferred
+        .update(updatePayload) // Explicitly cast to ProfilesUpdate
         .eq('id', user!.id);
 
       if (updateError) throw updateError;

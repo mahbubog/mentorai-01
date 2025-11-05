@@ -4,7 +4,7 @@ import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
 import { Textarea } from '../../../ui/textarea';
 import { Button } from '../../../ui/button';
-import { Upload, XCircle } from 'lucide-react'; // Removed unused Plus
+import { Upload, XCircle } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
 // Removed unused InstructorRow
 
@@ -31,7 +31,6 @@ export function InstructorSection({
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
   const [loadingInstructors, setLoadingInstructors] = useState(true);
   const [showNewInstructorForm, setShowNewInstructorForm] = useState(false);
-  // Removed unused newInstructorPhoto
   const [newInstructorPhotoUrl, setNewInstructorPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -74,7 +73,6 @@ export function InstructorSection({
       onFieldChange('instructor_bio', null);
       onFieldChange('instructor_credentials', null);
       onFieldChange('instructor_photo', undefined);
-      // setNewInstructorPhoto(null); // Removed as newInstructorPhoto is unused
       setNewInstructorPhotoUrl(null);
     }
   }, [onFieldChange]);
@@ -94,7 +92,6 @@ export function InstructorSection({
   const handleNewInstructorPhotoUpload = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // setNewInstructorPhoto(file); // Removed as newInstructorPhoto is unused
       setNewInstructorPhotoUrl(URL.createObjectURL(file));
       onFieldChange('instructor_photo', file);
     }
@@ -177,7 +174,6 @@ export function InstructorSection({
                 <button
                   type="button"
                   onClick={() => {
-                    // setNewInstructorPhoto(null); // Removed as newInstructorPhoto is unused
                     setNewInstructorPhotoUrl(null);
                     onFieldChange('instructor_photo', undefined);
                   }}

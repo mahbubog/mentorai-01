@@ -153,6 +153,7 @@ export interface Database {
           course_id: string
           outcome: string
           display_order?: number | null
+          created_at?: string
         }
         Update: {
           id?: string
@@ -280,8 +281,8 @@ export interface Database {
           enrolled_count: number
           created_at: string
           updated_at: string
-          meta_title: string | null // Added
-          meta_description: string | null // Added
+          meta_title: string | null
+          meta_description: string | null
         }
         Insert: {
           id?: string
@@ -314,8 +315,8 @@ export interface Database {
           enrolled_count?: number
           created_at?: string
           updated_at?: string
-          meta_title?: string | null // Added
-          meta_description?: string | null // Added
+          meta_title?: string | null
+          meta_description?: string | null
         }
         Update: {
           id?: string
@@ -348,8 +349,8 @@ export interface Database {
           enrolled_count?: number
           created_at?: string
           updated_at?: string
-          meta_title?: string | null // Added
-          meta_description?: string | null // Added
+          meta_title?: string | null
+          meta_description?: string | null
         }
       }
       payments: {
@@ -554,7 +555,7 @@ export type PaymentsInsert = Database['public']['Tables']['payments']['Insert'];
 export type PaymentsUpdate = Database['public']['Tables']['payments']['Update'];
 export type EnrollmentsInsert = Database['public']['Tables']['enrollments']['Insert'];
 export type NotificationsInsert = Database['public']['Tables']['notifications']['Insert'];
-export type NotificationsUpdate = Database['public']['Tables']['notifications']['Update']; // Corrected export
+export type NotificationsUpdate = Database['public']['Tables']['notifications']['Update'];
 export type CoursesUpdate = Database['public']['Tables']['courses']['Update'];
 export type LessonProgressInsert = Database['public']['Tables']['lesson_progress']['Insert'];
 export type ProfilesUpdate = Database['public']['Tables']['profiles']['Update'];

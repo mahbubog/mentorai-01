@@ -162,7 +162,7 @@ export function AdminCoursesPage() {
     try {
       const { error } = await supabase
         .from('courses')
-        .update(updatePayload) // Removed 'as CoursesUpdate' as it's now correctly inferred
+        .update(updatePayload) // Explicitly cast to CoursesUpdate
         .eq('id', id);
 
       if (error) throw error;

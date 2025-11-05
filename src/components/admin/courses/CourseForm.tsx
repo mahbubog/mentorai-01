@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CourseFormData, SectionFormData } from '../../../pages/admin/AdminCourseFormPage'; // Removed unused LessonFormData
+import { CourseFormData, SectionFormData } from '../../../pages/admin/AdminCourseFormPage';
 import { BasicInfoSection } from './sections/BasicInfoSection';
 import { CourseDetailsSection } from './sections/CourseDetailsSection';
 import { LiveCourseDetailsSection } from './sections/LiveCourseDetailsSection';
@@ -10,8 +10,7 @@ import { RequirementsSection } from './sections/RequirementsSection';
 import { LearningOutcomesSection } from './sections/LearningOutcomesSection';
 import { SeoSection } from './sections/SeoSection';
 import { PublishingOptionsSection } from './sections/PublishingOptionsSection';
-import { Button } from '../../ui/button'; // Assuming shadcn/ui Button
-// Removed unused Loader2
+import { Button } from '../../ui/button';
 
 interface CourseFormProps {
   initialData: CourseFormData;
@@ -27,7 +26,7 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
     setFormData(initialData);
   }, [initialData]);
 
-  const handleFieldChange = useCallback((field: string, value: any) => { // Changed field type to string
+  const handleFieldChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
@@ -91,7 +90,7 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
         instructor_id={formData.instructor_id}
         instructor_name={formData.instructor_name}
         instructor_bio={formData.instructor_bio}
-        instructor_credentials={formData.instructor_credentials} // Added missing prop
+        instructor_credentials={formData.instructor_credentials}
         onFieldChange={handleFieldChange}
       />
 
@@ -115,8 +114,8 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
       />
 
       <SeoSection
-        meta_title={formData.meta_title || ''} // Handle null
-        meta_description={formData.meta_description || ''} // Handle null
+        meta_title={formData.meta_title || ''}
+        meta_description={formData.meta_description || ''}
         onFieldChange={handleFieldChange}
       />
 

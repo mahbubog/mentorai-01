@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Check, ChevronDown, X } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react'; // Removed unused X
 
 interface MultiSelectProps {
   options: { label: string; value: string }[];
