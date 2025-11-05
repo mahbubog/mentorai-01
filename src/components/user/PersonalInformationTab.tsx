@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Upload, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
-import { useAuth } from '../../../contexts/AuthContext';
-import { ProfileRow, ProfilesUpdate } from '../../../lib/database.types';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
+import { ProfileRow, ProfilesUpdate } from '../../lib/database.types';
 
 export function PersonalInformationTab() {
   const { user } = useAuth();
