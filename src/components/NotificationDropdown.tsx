@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, CheckCircle, AlertCircle, MessageSquare, X, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationsInsert, Database } from '../lib/database.types';
+import { NotificationsInsert } from '../lib/database.types';
 
 interface NotificationRow extends NotificationsInsert {
   id: string;
@@ -57,7 +57,6 @@ export function NotificationDropdown() {
 
   const markAsRead = async (id: string) => {
     try {
-      // FIX 1: Use 'notifications' as const for table name
       await supabase
         .from('notifications' as const)
         .update({ is_read: true } as any)

@@ -8,9 +8,11 @@ interface ChangePasswordModalProps {
 }
 
 export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
-  const { user: _user } = useAuth(); // Renamed to _user to suppress warning
+  const { user } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,18 +33,43 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
     setMessage('');
     setError('');
 
+    if (!user?.email) {
+      setError('User email not found. Please log in again.');
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setError('New passwords do not match.');
       return;
     }
     if (!isPasswordStrong) {
-      setError('Password does not meet strength requirements.');
+      setError('New password does not meet strength requirements.');
+      return;
+    }
+    if (currentPassword === newPassword) {
+      setError('New password must be different from the current password.');
       return;
     }
 
     setSaving(true);
 
     try {
+      // Step 1: Verify Current Password (Re-authentication)
+      // We attempt to sign in with the current email and provided current password.
+      // If successful, the session is refreshed, but the user remains logged in.
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (authError) {
+        // Specific error message for incorrect current password
+        setError('Incorrect current password. Please enter your current password correctly.');
+        setSaving(false);
+        return;
+      }
+
+      // Step 2: Update Password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -50,6 +77,7 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
       if (updateError) throw updateError;
 
       setMessage('Password updated successfully! You will be logged out shortly.');
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       
@@ -94,8 +122,33 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Current Password field removed as Supabase doesn't require it for session-based updates */}
             
+            {/* Current Password */}
+            <div>
+              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                Current Password
+              </label>
+              <div className="relative">
+                <input
+                  id="currentPassword"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your current password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 New Password
@@ -133,6 +186,7 @@ export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
               )}
             </div>
 
+            {/* Confirm New Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm New Password
