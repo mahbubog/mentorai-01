@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom'; // Imported Link
+import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { Pencil, Trash2, Eye, Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-react'; // Removed unused Filter
-import { CoursesUpdate, CourseRow, Database } from '../../lib/database.types'; // Added Database for explicit type
+import { Pencil, Trash2, Eye, Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-react';
+import { CoursesUpdate, CourseRow, Database } from '../../lib/database.types';
 
 // Extend CourseRow to include instructor name and categories
 interface CourseWithDetails extends CourseRow {
   instructors: { name: string } | null;
   course_categories_mapping: {
     course_categories: {
-      id: string; // Added id here
+      id: string;
       name: string;
     };
   }[];
@@ -164,8 +164,8 @@ export function AdminCoursesPage() {
 
     try {
       const { error } = await supabase
-        .from('courses' as const) // Corrected type casting
-        .update(updatePayload as any) // Explicitly cast payload to any
+        .from('courses' as const)
+        .update(updatePayload as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -182,7 +182,7 @@ export function AdminCoursesPage() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Course Management</h1>
           <Link
-            to="/admin/courses/new" // Placeholder for new course creation route
+            to="/admin/courses/new"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
             Add New Course

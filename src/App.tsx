@@ -18,9 +18,10 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminCoursesPage } from './pages/admin/AdminCoursesPage';
 import { AdminPaymentsPage } from './pages/admin/AdminPaymentsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
-import { AdminPagesPage } from './pages/admin/AdminPagesPage'; // New import
-import { AdminContentPage } from './pages/admin/AdminContentPage'; // New import
-import { AdminSettingsPage } from './pages/admin/AdminSettingsPage'; // New import
+import { AdminPagesPage } from './pages/admin/AdminPagesPage';
+import { AdminContentPage } from './pages/admin/AdminContentPage';
+import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
+import { AdminCourseFormPage } from './pages/admin/AdminCourseFormPage'; // New import
 import { PrivateRoute } from './components/PrivateRoute';
 import { AdminRoute } from './components/AdminRoute';
 
@@ -97,6 +98,22 @@ export default function App() {
             }
           />
           <Route
+            path="/admin/courses/new" // New route for adding a course
+            element={
+              <AdminRoute>
+                <AdminCourseFormPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/courses/edit/:id" // New route for editing a course
+            element={
+              <AdminRoute>
+                <AdminCourseFormPage />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/admin/payments"
             element={
               <AdminRoute>
@@ -112,7 +129,7 @@ export default function App() {
               </AdminRoute>
             }
           />
-          <Route // New Admin Route
+          <Route
             path="/admin/pages"
             element={
               <AdminRoute>
@@ -120,7 +137,7 @@ export default function App() {
               </AdminRoute>
             }
           />
-          <Route // New Admin Route
+          <Route
             path="/admin/content"
             element={
               <AdminRoute>
@@ -128,7 +145,7 @@ export default function App() {
               </AdminRoute>
             }
           />
-          <Route // New Admin Route
+          <Route
             path="/admin/settings"
             element={
               <AdminRoute>
