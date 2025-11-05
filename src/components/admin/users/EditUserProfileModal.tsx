@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Upload, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
-import { ProfilesUpdate } from '../../../lib/database.types';
+import { ProfilesUpdate, ProfileRow } from '../../../lib/database.types';
 
 interface EditUserProfileModalProps {
   user: {
@@ -38,7 +38,8 @@ export function EditUserProfileModal({ user, onClose, onSaveSuccess }: EditUserP
           .eq('id', user.id)
           .maybeSingle();
         if (data) {
-          setFormData(prev => ({ ...prev, bio: data.bio || '' }));
+          // Cast data to ProfileRow to access bio property safely
+          setFormData(prev => ({ ...prev, bio: (data as ProfileRow).bio || '' }));
         }
         if (error) console.error('Error fetching user bio:', error);
       }
@@ -102,7 +103,7 @@ export function EditUserProfileModal({ user, onClose, onSaveSuccess }: EditUserP
 
       const { error: updateError } = await supabase
         .from('profiles')
-        .update(updatePayload as ProfilesUpdate)
+        .update(updatePayload)
         .eq('id', user.id);
       if (updateError) throw updateError;
 

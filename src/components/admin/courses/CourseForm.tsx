@@ -26,19 +26,20 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
     setFormData(initialData);
   }, [initialData]);
 
-  const handleFieldChange = useCallback((field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  // Update field type to accept string | number | symbol to satisfy components using keyof any
+  const handleFieldChange = useCallback((field: string | number | symbol, value: any) => {
+    setFormData(prev => ({ ...prev, [field as string]: value }));
   }, []);
 
   const handleSectionChange = useCallback((sections: SectionFormData[]) => {
     setFormData(prev => ({ ...prev, sections }));
   }, []);
 
-  const handleRequirementsChange = useCallback((requirements: { id?: string; requirement: string; display_order: number }[]) => {
+  const handleRequirementsChange = useCallback((requirements: { id?: string; requirement: string; display_order: number | null }[]) => {
     setFormData(prev => ({ ...prev, requirements }));
   }, []);
 
-  const handleLearningOutcomesChange = useCallback((learning_outcomes: { id?: string; outcome: string; display_order: number }[]) => {
+  const handleLearningOutcomesChange = useCallback((learning_outcomes: { id?: string; outcome: string; display_order: number | null }[]) => {
     setFormData(prev => ({ ...prev, learning_outcomes }));
   }, []);
 

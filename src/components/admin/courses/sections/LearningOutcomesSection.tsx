@@ -4,8 +4,8 @@ import { Button } from '../../../ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface LearningOutcomesSectionProps {
-  learning_outcomes: { id?: string; outcome: string; display_order: number }[];
-  onLearningOutcomesChange: (learning_outcomes: { id?: string; outcome: string; display_order: number }[]) => void;
+  learning_outcomes: { id?: string; outcome: string; display_order: number | null }[];
+  onLearningOutcomesChange: (learning_outcomes: { id?: string; outcome: string; display_order: number | null }[]) => void;
 }
 
 export function LearningOutcomesSection({ learning_outcomes, onLearningOutcomesChange }: LearningOutcomesSectionProps) {

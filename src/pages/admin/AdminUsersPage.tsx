@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { Mail, Phone, Calendar, Eye, Pencil, Ban, Trash2, Search, Download } from 'lucide-react'; // Removed unused User, CheckCircle, Filter
+import { Phone, Search, Download, Pencil, Ban, Trash2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal'; // New component for editing
@@ -110,7 +110,8 @@ export function AdminUsersPage() {
   };
 
   const handleBlockUnblock = async (userId: string, currentStatus: 'Active' | 'Blocked') => {
-    const newBanDuration: number | null = currentStatus === 'Active' ? 60 * 60 * 24 * 365 * 10 : null; // Block for 10 years in seconds or unblock (null)
+    // Supabase expects ban_duration in seconds (number) or null to unban.
+    const newBanDuration: number | null = currentStatus === 'Active' ? 60 * 60 * 24 * 365 * 10 : null; // Block for 10 years
     const actionText = currentStatus === 'Active' ? 'block' : 'unblock';
 
     if (!confirm(`Are you sure you want to ${actionText} this user?`)) return;
@@ -135,10 +136,7 @@ export function AdminUsersPage() {
 
     try {
       // Client-side deletion of auth.users is not directly supported without a service role key.
-      // We can delete the profile data, but the auth.users entry will remain unless handled by an Edge Function or Supabase Dashboard.
-      // For this example, we'll delete the profile and inform the user about the auth.users limitation.
-
-      // Delete profile data (which should cascade to enrollments, lesson_progress, user_notes due to RLS/FK)
+      // We delete the profile data, which should cascade to related tables (enrollments, notes, etc.)
       const { error: profileDeleteError } = await supabase
         .from('profiles')
         .delete()
@@ -215,13 +213,13 @@ export function AdminUsersPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <div className="flex items-end">
+            <div className="md:col-span-1 flex items-end">
               <button
                 onClick={handleExportUsers}
-                className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center"
+                className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center"
               >
                 <Download className="h-5 w-5 mr-2" />
-                Export
+                Export Users
               </button>
             </div>
           </div>
@@ -231,109 +229,86 @@ export function AdminUsersPage() {
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : (
+        ) : filteredUsers.length > 0 ? (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contact
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Registered
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Enrollments
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Enrolled Courses
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Joined Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredUsers.map((user) => {
                     const status = getUserStatus(user);
                     return (
                       <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              {user.profile_photo ? (
-                                <img src={user.profile_photo} alt={user.full_name || 'User'} className="h-10 w-10 rounded-full object-cover" />
-                              ) : (
-                                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                                  {user.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
-                                </div>
-                              )}
-                            </div>
-                            <div className="ml-4">
+                            <img
+                              src={user.profile_photo || 'https://via.placeholder.com/48'}
+                              alt={user.full_name || 'User'}
+                              className="w-10 h-10 rounded-full object-cover mr-3"
+                            />
+                            <div>
                               <p className="font-medium text-gray-900">{user.full_name || 'N/A'}</p>
-                              <p className="text-sm text-gray-500">ID: {user.id.substring(0, 8)}...</p>
+                              <p className="text-sm text-gray-500">{user.email}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center text-sm text-gray-900">
-                              <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                              <span className="hover:text-blue-600">{user.email}</span>
-                            </div>
-                            {user.phone && (
-                              <div className="flex items-center text-sm text-gray-500">
-                                <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                                {user.phone}
-                              </div>
-                            )}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="flex items-center space-x-1">
+                            <Phone className="h-4 w-4 text-gray-400" />
+                            <span>{user.phone || 'N/A'}</span>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.enrollments.length}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${status.color}`}>
                             {status.text}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <span className="font-semibold">{user.enrollments?.length || 0}</span>{' '}
-                          courses
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            {new Date(user.created_at).toLocaleDateString()}
-                          </div>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
                             <button
-                              onClick={() => alert(`Viewing user: ${user.full_name || user.email}`)}
-                              className="text-blue-600 hover:text-blue-700"
-                              title="View User Details"
-                            >
-                              <Eye className="h-5 w-5" />
-                            </button>
-                            <button
                               onClick={() => setSelectedUserToEdit(user)}
-                              className="text-gray-600 hover:text-gray-700"
-                              title="Edit User Profile"
+                              className="text-blue-600 hover:text-blue-700"
+                              title="Edit Profile"
                             >
                               <Pencil className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => handleBlockUnblock(user.id, status.text as 'Active' | 'Blocked')}
-                              className={`${status.text === 'Active' ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'}`}
+                              className={status.text === 'Active' ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}
                               title={status.text === 'Active' ? 'Block User' : 'Unblock User'}
                             >
                               <Ban className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user.id, user.full_name)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-gray-600 hover:text-gray-700"
                               title="Delete User"
                             >
                               <Trash2 className="h-5 w-5" />
@@ -346,10 +321,10 @@ export function AdminUsersPage() {
                 </tbody>
               </table>
             </div>
-
-            {filteredUsers.length === 0 && (
-              <div className="p-12 text-center text-gray-500">No users found</div>
-            )}
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <p className="text-gray-500">No users found matching your criteria.</p>
           </div>
         )}
       </div>
@@ -358,7 +333,7 @@ export function AdminUsersPage() {
         <EditUserProfileModal
           user={selectedUserToEdit}
           onClose={() => setSelectedUserToEdit(null)}
-          onSaveSuccess={loadUsers} // Reload users after successful edit
+          onSaveSuccess={loadUsers}
         />
       )}
     </AdminLayout>

@@ -4,8 +4,8 @@ import { Button } from '../../../ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface RequirementsSectionProps {
-  requirements: { id?: string; requirement: string; display_order: number }[];
-  onRequirementsChange: (requirements: { id?: string; requirement: string; display_order: number }[]) => void;
+  requirements: { id?: string; requirement: string; display_order: number | null }[];
+  onRequirementsChange: (requirements: { id?: string; requirement: string; display_order: number | null }[]) => void;
 }
 
 export function RequirementsSection({ requirements, onRequirementsChange }: RequirementsSectionProps) {

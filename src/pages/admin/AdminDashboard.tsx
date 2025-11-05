@@ -176,6 +176,11 @@ export function AdminDashboard() {
     }
   };
 
+  const renderPieLabel = ({ name, percent }: PieLabelRenderProps) => {
+    const percentage = (percent as number || 0) * 100;
+    return `${name} ${percentage.toFixed(0)}%`;
+  };
+
   return (
     <AdminLayout>
       <div>
@@ -331,7 +336,7 @@ export function AdminDashboard() {
                   labelLine={false}
                   outerRadius={100}
                   fill="#8884d8"
-                  label={({ name, percent }: PieLabelRenderProps) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  label={renderPieLabel}
                   dataKey="value"
                 >
                   {mockEnrollmentsByCategoryData.map((_, index) => (

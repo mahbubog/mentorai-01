@@ -107,7 +107,7 @@ export function LessonItem({ lesson, onLessonChange }: LessonItemProps) {
       <div className="flex items-center space-x-2">
         <Checkbox
           id={`lesson-preview-${lesson.id}`}
-          checked={lesson.is_preview}
+          checked={lesson.is_preview ?? false}
           onCheckedChange={handleIsPreviewChange}
         />
         <Label htmlFor={`lesson-preview-${lesson.id}`}>Preview Available</Label>

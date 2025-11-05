@@ -8,6 +8,10 @@ import { Label } from '../../components/ui/label';
 import { CourseCategoryRow, CourseCategoryInsert, CourseCategoryUpdate } from '../../lib/database.types';
 import { slugify } from '../../utils/slugify';
 
+interface CategoryLoadData extends CourseCategoryRow {
+  course_categories_mapping: { count: number }[];
+}
+
 interface CategoryWithCount extends CourseCategoryRow {
   course_count: number;
 }
@@ -61,7 +65,7 @@ export function AdminCategoriesPage() {
 
       if (error) throw error;
 
-      const categoriesWithCount = (data || []).map(cat => ({
+      const categoriesWithCount = (data as CategoryLoadData[] || []).map(cat => ({
         ...cat,
         course_count: cat.course_categories_mapping?.[0]?.count || 0,
       }));

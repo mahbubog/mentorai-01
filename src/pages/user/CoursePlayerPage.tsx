@@ -134,25 +134,6 @@ export function CoursePlayerPage() {
     loadCourse();
   }, [loadCourse]);
 
-  const markLessonComplete = async (lessonId: string) => {
-    try {
-      const upsertData: LessonProgressInsert = {
-        user_id: user!.id,
-        lesson_id: lessonId,
-        completed: true,
-        completed_at: new Date().toISOString(),
-      };
-
-      await supabase.from('lesson_progress').upsert([upsertData]);
-      setProgress({ ...progress, [lessonId]: true });
-      
-      // Automatically move to the next lesson after marking complete
-      handleNextLesson();
-    } catch (error) {
-      console.error('Error marking lesson complete:', error);
-    }
-  };
-
   const findNextLesson = (currentId: string): Lesson | null => {
     let foundCurrent = false;
     for (const section of course!.sections) {
@@ -173,6 +154,25 @@ export function CoursePlayerPage() {
     const nextLesson = findNextLesson(currentLesson.id);
     if (nextLesson) {
       setCurrentLesson(nextLesson);
+    }
+  };
+
+  const markLessonComplete = async (lessonId: string) => {
+    try {
+      const upsertData: LessonProgressInsert = {
+        user_id: user!.id,
+        lesson_id: lessonId,
+        completed: true,
+        completed_at: new Date().toISOString(),
+      };
+
+      await supabase.from('lesson_progress').upsert([upsertData]);
+      setProgress({ ...progress, [lessonId]: true });
+      
+      // Automatically move to the next lesson after marking complete
+      handleNextLesson();
+    } catch (error) {
+      console.error('Error marking lesson complete:', error);
     }
   };
 

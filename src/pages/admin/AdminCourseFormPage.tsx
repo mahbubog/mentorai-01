@@ -29,8 +29,8 @@ export interface LessonFormData {
   description: string | null; // Allow null
   video_url: string;
   duration: string | null; // Allow null
-  is_preview: boolean;
-  display_order: number;
+  is_preview: boolean | null; // Must allow null
+  display_order: number | null; // Allow null
   resources: { id?: string; title: string; file_url: string; file_type: string | null; file?: File }[]; // Allow file_type to be null
 }
 
@@ -38,15 +38,15 @@ export interface SectionFormData {
   id?: string;
   title: string;
   description: string | null; // Allow null
-  display_order: number;
+  display_order: number | null; // Allow null
   lessons: LessonFormData[];
 }
 
 export interface CourseFormData extends Omit<CourseRow, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count' | 'enrolled_count'> {
   id?: string;
   category_ids: string[];
-  requirements: { id?: string; requirement: string; display_order: number }[];
-  learning_outcomes: { id?: string; outcome: string; display_order: number }[];
+  requirements: { id?: string; requirement: string; display_order: number | null }[];
+  learning_outcomes: { id?: string; outcome: string; display_order: number | null }[];
   sections: SectionFormData[];
   meta_title: string | null; // Allow null
   meta_description: string | null; // Allow null
@@ -94,8 +94,8 @@ const initialCourseState: CourseFormData = {
 // Define a type for the data returned by the complex select query
 type CourseLoadData = CourseRow & {
   course_categories_mapping: { category_id: string }[];
-  course_requirements: { id: string; requirement: string; display_order: number }[];
-  course_learning_outcomes: { id: string; outcome: string; display_order: number }[];
+  course_requirements: { id: string; requirement: string; display_order: number | null }[];
+  course_learning_outcomes: { id: string; outcome: string; display_order: number | null }[];
   course_sections: (CourseSectionRow & { // Use CourseSectionRow
     course_lessons: (CourseLessonRow & { // Use CourseLessonRow
       lesson_resources: LessonResourceRow[]; // Use LessonResourceRow
@@ -191,10 +191,12 @@ export function AdminCourseFormPage() {
           .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
           .map(section => ({
             ...section,
+            display_order: section.display_order, // Ensure display_order is included and allows null
             lessons: (section.course_lessons || [])
               .sort((a: CourseLessonRow, b: CourseLessonRow) => (a.display_order || 0) - (b.display_order || 0))
-              .map((lesson: CourseLessonRow) => ({
+              .map((lesson: CourseLessonRow & { lesson_resources: LessonResourceRow[] }) => ({
                 ...lesson,
+                is_preview: lesson.is_preview, // Ensure null is allowed
                 resources: lesson.lesson_resources || [],
               })),
           })),
@@ -250,7 +252,7 @@ export function AdminCourseFormPage() {
         };
         const { data: newInstructor, error: instructorError } = await supabase
           .from('instructors')
-          .insert([instructorPayload] as InstructorsInsert[])
+          .insert([instructorPayload])
           .select('id')
           .single();
 
@@ -324,7 +326,7 @@ export function AdminCourseFormPage() {
           course_id: currentCourseId!,
           category_id: catId,
         }));
-        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings as CourseCategoriesMappingInsert[]);
+        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings);
         if (categoryError) throw categoryError;
       }
 
@@ -336,7 +338,7 @@ export function AdminCourseFormPage() {
           requirement: req.requirement,
           display_order: index,
         }));
-        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload as CourseRequirementInsert[]);
+        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload);
         if (reqError) throw reqError;
       }
 
@@ -348,7 +350,7 @@ export function AdminCourseFormPage() {
           outcome: out.outcome,
           display_order: index,
         }));
-        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload as CourseLearningOutcomeInsert[]);
+        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload);
         if (outError) throw outError;
       }
 
