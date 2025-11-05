@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, CheckCircle, AlertCircle, MessageSquare, X, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationsInsert, NotificationsUpdate } from '../lib/database.types';
+import { NotificationsInsert } from '../lib/database.types'; // Removed NotificationsUpdate as it's not directly used for the payload
 
 interface NotificationRow extends NotificationsInsert {
   id: string;
@@ -59,7 +59,7 @@ export function NotificationDropdown() {
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ is_read: true } as NotificationsUpdate)
+        .update({ is_read: true })
         .eq('id', id);
       
       if (error) throw error;

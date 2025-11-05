@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, CheckCircle, Circle, BookOpen } from 'lucide-react';
+import { CourseLessonRow } from '../../lib/database.types'; // Import CourseLessonRow
 
-interface Lesson {
-  id: string;
-  title: string;
-  description: string | null; // Added description for consistency
-  duration: string | null;
-  video_url: string;
-}
+interface Lesson extends CourseLessonRow {} // Extend CourseLessonRow for consistency
 
 interface Section {
   id: string;

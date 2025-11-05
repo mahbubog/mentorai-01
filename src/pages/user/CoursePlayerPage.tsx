@@ -143,7 +143,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress').upsert([upsertData] as LessonProgressInsert[]);
+      await supabase.from('lesson_progress').upsert([upsertData]);
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete
