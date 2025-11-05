@@ -40,7 +40,6 @@ export function AdminUsersPage() {
     setLoading(true);
     try {
       // Fetch profiles, joining auth_users (for email/ban status) and enrollments count.
-      // Since we start from 'profiles', we get all users who successfully registered and created a profile entry.
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -54,7 +53,12 @@ export function AdminUsersPage() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Error loading users:', error);
+        // Display a user-friendly error message if data fetching fails
+        alert('Failed to load users. Check console for RLS or network errors.');
+        throw error;
+      }
 
       const usersData: UserProfile[] = (data || []).map((profile: any) => ({
         id: profile.id,
@@ -68,7 +72,7 @@ export function AdminUsersPage() {
       }));
       setAllUsers(usersData);
     } catch (error) {
-      console.error('Error loading users:', error);
+      // Error already logged above
     } finally {
       setLoading(false);
     }
