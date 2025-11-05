@@ -5,7 +5,7 @@ import { Phone, Search, Download, Pencil, Ban, Trash2, Eye } from 'lucide-react'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal';
-import { Link } from 'react-router-dom'; // Import Link
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -14,6 +14,7 @@ interface UserProfile {
   profile_photo: string | null;
   created_at: string;
   email: string; // From auth.users
+  last_sign_in_at: string | null; // From auth.users
   banned_until: string | null; // From auth.users
   enrollments: { id: string }[];
 }
@@ -39,9 +40,24 @@ export function AdminUsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // Fetch profiles, joining enrollments count.
-      // We temporarily remove the direct join to auth.users to bypass potential RLS/schema issues.
-      const { data, error } = await supabase
+      // 1. Fetch all Auth Users (provides email, last_sign_in_at, banned_until)
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('Supabase Auth Admin Error:', authError);
+        throw new Error('Failed to fetch authentication data. Ensure admin privileges are correct.');
+      }
+
+      const authUsersMap = new Map(
+        authData.users.map((u: any) => [u.id, { // Cast u to any to access admin properties (Fix Error 15)
+          email: u.email || 'N/A',
+          last_sign_in_at: u.last_sign_in_at,
+          banned_until: u.banned_until,
+        }])
+      );
+
+      // 2. Fetch Profiles and Enrollments (requires RLS on profiles/enrollments for admin)
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -53,27 +69,36 @@ export function AdminUsersPage() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Supabase Error loading users:', error);
-        alert('Failed to load users. Check console for RLS or network errors.');
-        throw error;
-      }
+      if (profilesError) throw profilesError;
 
-      // Since we removed the auth_users join, we need to fetch email/ban status separately or mock it.
-      // For now, we will use a placeholder for email/ban status to ensure the list loads.
-      const usersData: UserProfile[] = (data || []).map((profile: any) => ({
-        id: profile.id,
-        full_name: profile.full_name,
-        phone: profile.phone,
-        profile_photo: profile.profile_photo,
-        created_at: profile.created_at,
-        email: 'N/A (Auth Join Failed)', // Placeholder
-        banned_until: null, // Placeholder
-        enrollments: profile.enrollments || [],
-      }));
+      // 3. Merge data (Fix Errors 16 & 17)
+      const usersData: UserProfile[] = (profilesData || [])
+        .map((profile: any) => {
+          const authInfo = authUsersMap.get(profile.id);
+          
+          // Only include users who have both a profile and an auth entry
+          if (!authInfo) return null; 
+
+          return {
+            id: profile.id,
+            full_name: profile.full_name,
+            phone: profile.phone,
+            profile_photo: profile.profile_photo,
+            created_at: profile.created_at,
+            enrollments: profile.enrollments || [],
+            
+            // Merged Auth Data, ensuring string | null types
+            email: authInfo.email,
+            last_sign_in_at: authInfo.last_sign_in_at || null,
+            banned_until: authInfo.banned_until || null,
+          } as UserProfile;
+        })
+        .filter((u): u is UserProfile => u !== null);
+        
       setAllUsers(usersData);
-    } catch (error) {
-      // Error already logged above
+    } catch (error: any) {
+      console.error('Supabase Error loading users:', error);
+      alert('Failed to load users: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -92,10 +117,11 @@ export function AdminUsersPage() {
       );
     }
 
-    // Status Filter (Disabled since we removed banned_until data)
-    if (statusFilter !== 'all') {
-      // If filtering is active, we skip filtering since we don't have the data
-      console.warn(`Status filter '${statusFilter}' skipped because auth data is not loaded.`);
+    // Status Filter
+    if (statusFilter === 'active') {
+      tempUsers = tempUsers.filter(user => !user.banned_until || new Date(user.banned_until) < new Date());
+    } else if (statusFilter === 'blocked') {
+      tempUsers = tempUsers.filter(user => user.banned_until && new Date(user.banned_until) >= new Date());
     }
 
     // Date Filter
@@ -113,12 +139,14 @@ export function AdminUsersPage() {
   };
 
   const getUserStatus = (user: UserProfile) => {
-    // Since we removed the join, we default to Active
-    return { text: 'Active', color: 'bg-green-100 text-green-800' };
+    const isBanned = user.banned_until && new Date(user.banned_until) > new Date();
+    return { 
+      text: isBanned ? 'Blocked' : 'Active', 
+      color: isBanned ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' 
+    };
   };
 
   const handleBlockUnblock = async (userId: string, currentStatus: 'Active' | 'Blocked') => {
-    // This action still requires auth.admin access, which should work if the user is an admin.
     const newBanDuration: number | null = currentStatus === 'Active' ? 60 * 60 * 24 * 365 * 10 : null; // Block for 10 years
     const actionText = currentStatus === 'Active' ? 'block' : 'unblock';
 
@@ -131,7 +159,7 @@ export function AdminUsersPage() {
 
       if (error) throw error;
 
-      alert(`User ${actionText}ed successfully! Note: Status update requires reloading the page.`);
+      alert(`User ${actionText}ed successfully! Reloading data...`);
       loadUsers(); // Reload data to reflect changes
     } catch (error: any) {
       console.error(`Error ${actionText}ing user:`, error);
@@ -143,7 +171,7 @@ export function AdminUsersPage() {
     if (!confirm(`Are you sure you want to permanently delete user "${userName || userId}"? This action cannot be undone.`)) return;
 
     try {
-      // Delete the profile data, which should cascade to related tables (enrollments, notes, etc.)
+      // 1. Delete the profile data, which should cascade to related tables (enrollments, notes, etc.)
       const { error: profileDeleteError } = await supabase
         .from('profiles')
         .delete()
@@ -153,8 +181,18 @@ export function AdminUsersPage() {
         console.error("Error deleting user profile:", profileDeleteError);
         throw new Error("Failed to delete user profile data. " + profileDeleteError.message);
       }
+      
+      // 2. Attempt to delete the auth user entry (requires admin privileges)
+      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
 
-      alert(`User profile for "${userName || userId}" deleted successfully. Please note: The associated authentication entry in 'auth.users' needs to be manually deleted from the Supabase dashboard or via a custom Edge Function for full removal.`);
+      if (authDeleteError) {
+        console.error("Error deleting auth user:", authDeleteError);
+        // We alert but proceed, as profile data is gone.
+        alert(`User profile deleted successfully. WARNING: Failed to delete associated authentication entry: ${authDeleteError.message}`);
+      } else {
+        alert(`User "${userName || userId}" deleted successfully!`);
+      }
+      
       loadUsers(); // Reload data
     } catch (error: any) {
       console.error('Error deleting user:', error);

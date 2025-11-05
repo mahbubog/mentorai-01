@@ -141,8 +141,8 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      // Removed redundant cast (Error 4 fix)
-      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
+      // Fix Error 3: Explicitly cast insert payload
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData] as PaymentsInsert[]);
 
       if (paymentError) throw paymentError;
 

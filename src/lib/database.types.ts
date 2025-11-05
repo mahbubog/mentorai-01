@@ -556,6 +556,7 @@ export type PaymentsUpdate = Database['public']['Tables']['payments']['Update'];
 export type EnrollmentsInsert = Database['public']['Tables']['enrollments']['Insert'];
 export type NotificationsInsert = Database['public']['Tables']['notifications']['Insert'];
 export type NotificationsUpdate = Database['public']['Tables']['notifications']['Update'];
+export type CoursesInsert = Database['public']['Tables']['courses']['Insert']; // Added CoursesInsert
 export type CoursesUpdate = Database['public']['Tables']['courses']['Update'];
 export type LessonProgressInsert = Database['public']['Tables']['lesson_progress']['Insert'];
 export type ProfilesUpdate = Database['public']['Tables']['profiles']['Update'];

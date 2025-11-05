@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { User, Mail, Phone, Calendar, BookOpen, DollarSign, Clock, Ban, Trash2, Send, AlertCircle, Loader2, CheckCircle, XCircle, Pencil } from 'lucide-react';
-import { ProfileRow, EnrollmentRow, PaymentRow, CourseRow, PaymentsUpdate } from '../../lib/database.types';
+import { Mail, Phone, Calendar, BookOpen, DollarSign, Clock, Ban, Trash2, Send, Loader2, Pencil } from 'lucide-react';
+import { ProfileRow, EnrollmentRow, PaymentRow, CourseRow } from '../../lib/database.types';
 import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal';
 
 interface UserDetails extends ProfileRow {
@@ -52,26 +52,19 @@ export function AdminUserDetailsPage() {
         return;
       }
 
-      // 1b. Fetch Auth Details separately (since direct join might fail due to RLS/schema)
-      // NOTE: Client-side fetching of auth.users data is generally restricted. 
-      // We rely on the user's session data for email, but for admin view, we need to fetch it.
-      // Since we cannot directly query auth.users, we will use placeholders for now.
-      // In a real app, this would require a Supabase Edge Function or Service Role key access.
+      // 1b. Fetch Auth Details using Admin API (requires admin privileges)
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(id);
       
-      // Placeholder for Auth data
-      const authData = {
-        email: 'N/A (Auth Restricted)',
-        last_sign_in_at: null,
-        created_at: profileData.created_at,
-        banned_until: null,
-      };
+      if (authError) throw authError;
+
+      const authUserAny = authUser.user as any; // Cast to any to access admin properties (Fix Error 24)
 
       setUserDetails({
         ...(profileData as ProfileRow),
-        email: authData.email,
-        last_sign_in_at: authData.last_sign_in_at,
-        created_at: authData.created_at,
-        banned_until: authData.banned_until,
+        email: authUserAny.email || 'N/A',
+        last_sign_in_at: authUserAny.last_sign_in_at || null, // Fix Error 23
+        created_at: authUserAny.created_at,
+        banned_until: authUserAny.banned_until || null, // Fix Error 24
       });
 
       // 2. Fetch Enrollments
@@ -111,13 +104,12 @@ export function AdminUserDetailsPage() {
     if (!confirm(`Are you sure you want to ${actionText} this user?`)) return;
 
     try {
-      // This action uses the Admin API, which should work if the user is authenticated as an admin.
       const { error } = await supabase.auth.admin.updateUserById(userId, {
         ban_duration: newBanDuration,
       } as any); 
 
       if (error) throw error;
-      alert(`User ${actionText}ed successfully!`);
+      alert(`User ${actionText}ed successfully! Reloading data...`);
       loadUserDetails(userId);
     } catch (error: any) {
       alert(`Failed to ${actionText} user: ` + error.message);
@@ -129,10 +121,19 @@ export function AdminUserDetailsPage() {
     if (!confirm(`Are you sure you want to permanently delete user "${userDetails.full_name || userDetails.email}"? This action cannot be undone.`)) return;
 
     try {
-      // Delete the profile data (cascades to related tables)
+      // 1. Delete the profile data (cascades to related tables)
       await supabase.from('profiles').delete().eq('id', userId);
+      
+      // 2. Delete the auth user entry (requires admin privileges)
+      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
 
-      alert(`User profile deleted successfully. Note: Auth entry needs manual deletion.`);
+      if (authDeleteError) {
+        console.error("Error deleting auth user:", authDeleteError);
+        alert(`User profile deleted successfully. WARNING: Failed to delete associated authentication entry: ${authDeleteError.message}`);
+      } else {
+        alert(`User "${userDetails.full_name || userDetails.email}" deleted successfully!`);
+      }
+
       navigate('/admin/users');
     } catch (error: any) {
       alert('Failed to delete user: ' + error.message);
@@ -176,9 +177,9 @@ export function AdminUserDetailsPage() {
     );
   }
 
-  // Status is defaulted to Active since we cannot fetch banned_until without auth.users join
-  const status = 'Active'; 
-  const statusColor = 'bg-green-100 text-green-800';
+  const isBanned = userDetails.banned_until && new Date(userDetails.banned_until) > new Date();
+  const status = isBanned ? 'Blocked' : 'Active';
+  const statusColor = isBanned ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
   const totalSpent = payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
@@ -227,7 +228,7 @@ export function AdminUserDetailsPage() {
               </div>
               <div className="flex items-center space-x-3">
                 <Clock className="h-5 w-5 text-gray-500" />
-                <span className="text-gray-700">Last Login: N/A (Auth Restricted)</span>
+                <span className="text-gray-700">Last Login: {userDetails.last_sign_in_at ? new Date(userDetails.last_sign_in_at).toLocaleString() : 'N/A'}</span>
               </div>
             </div>
             
