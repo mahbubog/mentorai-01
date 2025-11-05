@@ -4,6 +4,7 @@ import { UserLayout } from '../../components/UserLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Play, Clock, CheckCircle, XCircle, Award } from 'lucide-react';
+import { CourseRow, PaymentsRow, EnrollmentsRow } from '../../lib/database.types'; // Added missing types
 
 // Define the unified structure for display
 interface UserCourse {
@@ -47,7 +48,7 @@ export function MyCoursesPage() {
 
       if (error) throw error;
 
-      const mappedCourses: UserCourse[] = (paymentsData || []).map((p: any) => {
+      const mappedCourses: UserCourse[] = (paymentsData || []).map((p: PaymentsRow & { courses: CourseRow, enrollments: EnrollmentsRow[] }) => {
         const enrollment = p.enrollments?.[0];
         const progress = enrollment?.progress_percentage || 0;
         const paymentStatus = p.status;

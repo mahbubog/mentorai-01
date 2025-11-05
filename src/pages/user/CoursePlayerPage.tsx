@@ -3,22 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { CourseRow, LessonProgressInsert, LessonProgressRow } from '../../lib/database.types';
+import { CourseRow, LessonProgressInsert, LessonProgressRow, CourseLessonRow, CourseSectionRow } from '../../lib/database.types'; // Added missing types
 import { CoursePlayerSidebar } from '../../components/course/CoursePlayerSidebar';
 import { LessonContent } from '../../components/course/LessonContent';
 import { LiveCourseContent } from '../../components/course/LiveCourseContent';
 
-interface Lesson {
-  id: string;
-  title: string;
-  description: string | null;
-  duration: string | null;
-  video_url: string;
-}
+interface Lesson extends CourseLessonRow {} // Use CourseLessonRow
 
-interface Section {
-  id: string;
-  title: string;
+interface Section extends CourseSectionRow { // Use CourseSectionRow
   course_lessons: Lesson[];
 }
 
@@ -85,7 +77,9 @@ export function CoursePlayerPage() {
           .select(`
             id,
             title,
-            course_lessons (id, title, description, duration, video_url)
+            description,
+            display_order,
+            course_lessons (id, title, description, duration, video_url, is_preview, display_order)
           `)
           .eq('course_id', courseId)
           .order('display_order');
@@ -123,7 +117,7 @@ export function CoursePlayerPage() {
           if (initialLesson) break;
         }
 
-        if (!initialLesson && sectionsArray.length > 0) {
+        if (!initialLesson && sectionsArray.length > 0 && sectionsArray[0].course_lessons.length > 0) {
           initialLesson = sectionsArray[0].course_lessons[0];
         }
         setCurrentLesson(initialLesson);
@@ -149,8 +143,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress' as const).upsert(upsertData as any);
-
+      await supabase.from('lesson_progress').upsert(upsertData); // Removed 'as any'
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete

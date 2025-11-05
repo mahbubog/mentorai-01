@@ -3,7 +3,24 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { CourseForm } from '../../components/admin/courses/CourseForm';
 import { supabase } from '../../lib/supabase';
-import { CourseRow, CourseCategoriesMappingInsert, CourseRequirementsInsert, CourseLearningOutcomesInsert, CourseSectionsInsert, CourseLessonsInsert, LessonResourcesInsert, CoursesUpdate, CourseSectionsUpdate, CourseLessonsUpdate, LessonResourcesUpdate, CourseCategoriesMappingUpdate, CourseRequirementsUpdate, CourseLearningOutcomesUpdate, InstructorsInsert, InstructorsUpdate } from '../../lib/database.types';
+import { 
+  CourseRow, 
+  CourseCategoriesMappingInsert, 
+  CourseRequirementInsert, 
+  CourseLearningOutcomeInsert, 
+  CourseSectionInsert, 
+  CourseLessonInsert, 
+  LessonResourceInsert, 
+  CoursesUpdate, 
+  CourseSectionUpdate, 
+  CourseLessonUpdate, 
+  LessonResourceUpdate, 
+  CourseCategoriesMappingUpdate, 
+  CourseRequirementUpdate, 
+  CourseLearningOutcomeUpdate, 
+  InstructorsInsert, 
+  InstructorsUpdate 
+} from '../../lib/database.types';
 import { useAuth } from '../../contexts/AuthContext';
 
 // Define extended types for the form data
@@ -36,7 +53,7 @@ export interface CourseFormData extends Omit<CourseRow, 'id' | 'created_at' | 'u
   meta_description: string | null; // Allow null
   thumbnail_file?: File;
   preview_video_file?: File;
-  instructor_name?: string; // For new instructor creation
+  instructor_name?: string | null; // For new instructor creation
   instructor_bio?: string | null;
   instructor_photo?: File;
   instructor_credentials?: string | null;
@@ -80,9 +97,9 @@ type CourseLoadData = CourseRow & {
   course_categories_mapping: { category_id: string }[];
   course_requirements: { id: string; requirement: string; display_order: number }[];
   course_learning_outcomes: { id: string; outcome: string; display_order: number }[];
-  course_sections: (CourseSectionsUpdate & {
-    course_lessons: (CourseLessonsUpdate & {
-      lesson_resources: LessonResourcesUpdate[];
+  course_sections: (CourseSectionRow & { // Use CourseSectionRow
+    course_lessons: (CourseLessonRow & { // Use CourseLessonRow
+      lesson_resources: LessonResourceRow[]; // Use LessonResourceRow
     })[];
   })[];
 };
@@ -134,12 +151,12 @@ export function AdminCourseFormPage() {
 
       const loadedCourse: CourseFormData = {
         ...(course as CourseLoadData), // Cast to the specific loaded type
-        price: Number(course.price),
-        discount_price: course.discount_price ? Number(course.discount_price) : null,
-        category_ids: (course.course_categories_mapping || []).map(c => c.category_id),
-        requirements: (course.course_requirements || []).sort((a, b) => a.display_order - b.display_order),
-        learning_outcomes: (course.course_learning_outcomes || []).sort((a, b) => a.display_order - b.display_order),
-        sections: (course.course_sections || [])
+        price: Number((course as CourseLoadData).price),
+        discount_price: (course as CourseLoadData).discount_price ? Number((course as CourseLoadData).discount_price) : null,
+        category_ids: ((course as CourseLoadData).course_categories_mapping || []).map(c => c.category_id),
+        requirements: ((course as CourseLoadData).course_requirements || []).sort((a, b) => a.display_order - b.display_order),
+        learning_outcomes: ((course as CourseLoadData).course_learning_outcomes || []).sort((a, b) => a.display_order - b.display_order),
+        sections: ((course as CourseLoadData).course_sections || [])
           .sort((a, b) => a.display_order - b.display_order)
           .map(section => ({
             ...section,
@@ -150,8 +167,8 @@ export function AdminCourseFormPage() {
                 resources: lesson.lesson_resources || [],
               })),
           })),
-        meta_title: course.meta_title || null,
-        meta_description: course.meta_description || null,
+        meta_title: (course as CourseLoadData).meta_title || null,
+        meta_description: (course as CourseLoadData).meta_description || null,
       };
       setCourseData(loadedCourse);
     } catch (err: any) {
@@ -254,13 +271,13 @@ export function AdminCourseFormPage() {
       if (currentCourseId) {
         const { error: updateError } = await supabase
           .from('courses')
-          .update(coursePayload)
+          .update(coursePayload as CoursesUpdate) // Explicitly cast to CoursesUpdate
           .eq('id', currentCourseId);
         if (updateError) throw updateError;
       } else {
         const { data: newCourse, error: insertError } = await supabase
           .from('courses')
-          .insert(coursePayload as CourseRow) // Cast to Insert type
+          .insert(coursePayload as CourseRow) // Cast to CourseRow for insert
           .select('id')
           .single();
         if (insertError) throw insertError;
@@ -283,7 +300,7 @@ export function AdminCourseFormPage() {
       // 5. Handle Requirements (delete existing, insert new)
       await supabase.from('course_requirements').delete().eq('course_id', currentCourseId);
       if (formData.requirements.length > 0) {
-        const requirementsPayload: CourseRequirementsInsert[] = formData.requirements.map((req, index) => ({
+        const requirementsPayload: CourseRequirementInsert[] = formData.requirements.map((req, index) => ({
           course_id: currentCourseId!,
           requirement: req.requirement,
           display_order: index,
@@ -295,7 +312,7 @@ export function AdminCourseFormPage() {
       // 6. Handle Learning Outcomes (delete existing, insert new)
       await supabase.from('course_learning_outcomes').delete().eq('course_id', currentCourseId);
       if (formData.learning_outcomes.length > 0) {
-        const outcomesPayload: CourseLearningOutcomesInsert[] = formData.learning_outcomes.map((out, index) => ({
+        const outcomesPayload: CourseLearningOutcomeInsert[] = formData.learning_outcomes.map((out, index) => ({
           course_id: currentCourseId!,
           outcome: out.outcome,
           display_order: index,
@@ -315,7 +332,7 @@ export function AdminCourseFormPage() {
 
         for (const section of formData.sections) {
           let currentSectionId = section.id;
-          const sectionPayload: Omit<CourseSectionsUpdate, 'id' | 'created_at'> = {
+          const sectionPayload: Omit<CourseSectionUpdate, 'id' | 'created_at'> = {
             course_id: currentCourseId!,
             title: section.title,
             description: section.description,
@@ -325,13 +342,13 @@ export function AdminCourseFormPage() {
           if (currentSectionId) {
             const { error: updateError } = await supabase
               .from('course_sections')
-              .update(sectionPayload)
+              .update(sectionPayload as CourseSectionUpdate) // Explicitly cast
               .eq('id', currentSectionId);
             if (updateError) throw updateError;
           } else {
             const { data: newSection, error: insertError } = await supabase
               .from('course_sections')
-              .insert(sectionPayload as CourseSectionsInsert) // Cast to Insert type
+              .insert(sectionPayload as CourseSectionInsert) // Explicitly cast
               .select('id')
               .single();
             if (insertError) throw insertError;
@@ -349,7 +366,7 @@ export function AdminCourseFormPage() {
 
           for (const lesson of section.lessons) {
             let currentLessonId = lesson.id;
-            const lessonPayload: Omit<CourseLessonsUpdate, 'id' | 'created_at'> = {
+            const lessonPayload: Omit<CourseLessonUpdate, 'id' | 'created_at'> = {
               section_id: currentSectionId!,
               title: lesson.title,
               description: lesson.description,
@@ -362,13 +379,13 @@ export function AdminCourseFormPage() {
             if (currentLessonId) {
               const { error: updateError } = await supabase
                 .from('course_lessons')
-                .update(lessonPayload)
+                .update(lessonPayload as CourseLessonUpdate) // Explicitly cast
                 .eq('id', currentLessonId);
               if (updateError) throw updateError;
             } else {
               const { data: newLesson, error: insertError } = await supabase
                 .from('course_lessons')
-                .insert(lessonPayload as CourseLessonsInsert) // Cast to Insert type
+                .insert(lessonPayload as CourseLessonInsert) // Explicitly cast
                 .select('id')
                 .single();
               if (insertError) throw insertError;
@@ -390,7 +407,7 @@ export function AdminCourseFormPage() {
                 resourceUrl = await uploadFile(resource.file, 'course_assets', 'lesson_resources');
               }
 
-              const resourcePayload: Omit<LessonResourcesUpdate, 'id' | 'created_at'> = {
+              const resourcePayload: Omit<LessonResourceUpdate, 'id' | 'created_at'> = {
                 lesson_id: currentLessonId!,
                 title: resource.title,
                 file_url: resourceUrl,
@@ -400,13 +417,13 @@ export function AdminCourseFormPage() {
               if (resource.id) {
                 const { error: updateError } = await supabase
                   .from('lesson_resources')
-                  .update(resourcePayload)
+                  .update(resourcePayload as LessonResourceUpdate) // Explicitly cast
                   .eq('id', resource.id);
                 if (updateError) throw updateError;
               } else {
                 const { error: insertError } = await supabase
                   .from('lesson_resources')
-                  .insert(resourcePayload as LessonResourcesInsert); // Cast to Insert type
+                  .insert(resourcePayload as LessonResourceInsert); // Explicitly cast
                 if (insertError) throw insertError;
               }
             }

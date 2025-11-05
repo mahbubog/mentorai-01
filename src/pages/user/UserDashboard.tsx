@@ -4,7 +4,7 @@ import { UserLayout } from '../../components/UserLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { BookOpen, Clock, Award, AlertCircle } from 'lucide-react';
-import { EnrollmentRow, CourseRow } from '../../lib/database.types';
+import { EnrollmentRow, CourseRow, PaymentRow } from '../../lib/database.types'; // Added missing PaymentRow
 
 interface EnrollmentWithCourse extends EnrollmentRow {
   courses: CourseRow;

@@ -4,7 +4,7 @@ import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
 import { Upload, XCircle } from 'lucide-react'; // Removed unused Image, Video
 import { slugify } from '../../../../utils/slugify';
-import { Button } from '../../../ui/button'; // Added Button import
+import { Button } from '../../../ui/button';
 
 interface BasicInfoSectionProps {
   title: string;
@@ -13,7 +13,7 @@ interface BasicInfoSectionProps {
   full_description: string | null; // Allow null
   thumbnail: string | null; // Allow null
   preview_video: string | null; // Allow null
-  onFieldChange: (field: keyof any, value: any) => void; // Keep as any for flexibility, or define specific keys
+  onFieldChange: (field: string, value: any) => void; // Changed field type to string
 }
 
 export function BasicInfoSection({

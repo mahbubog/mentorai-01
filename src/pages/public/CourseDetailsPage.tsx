@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Clock, Users, Award, BookOpen, CheckCircle, Star, Download, Smartphone, Lock, Calendar, Globe } from 'lucide-react';
 import { PaymentModal } from '../../components/PaymentModal';
 import { PaymentSuccessModal } from '../../components/PaymentSuccessModal';
-import { CourseRow } from '../../lib/database.types';
+import { CourseRow, CourseRequirementRow, CourseLearningOutcomeRow } from '../../lib/database.types'; // Added missing types
 
 // Define a type for the course data including related tables
 interface CourseDetails extends CourseRow {
@@ -16,8 +16,8 @@ interface CourseDetails extends CourseRow {
     bio: string | null;
     photo: string | null;
   } | null;
-  course_requirements: { requirement: string }[];
-  course_learning_outcomes: { outcome: string }[];
+  course_requirements: CourseRequirementRow[]; // Use CourseRequirementRow
+  course_learning_outcomes: CourseLearningOutcomeRow[]; // Use CourseLearningOutcomeRow
   target_audience: string | null;
 }
 
@@ -362,7 +362,7 @@ export function CourseDetailsPage() {
 
                   <h3 className="text-xl font-bold mb-4 mt-8">What you'll learn</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {course.course_learning_outcomes?.map((outcome: any, index: number) => (
+                    {course.course_learning_outcomes?.map((outcome: CourseLearningOutcomeRow, index: number) => (
                       <div key={index} className="flex items-start">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                         <span className="text-gray-700">{outcome.outcome}</span>
@@ -375,7 +375,7 @@ export function CourseDetailsPage() {
                   <div className="bg-white rounded-xl shadow p-8">
                     <h3 className="text-xl font-bold mb-4">Requirements & Prerequisites</h3>
                     <ul className="space-y-3">
-                      {course.course_requirements?.map((req: any, index: number) => (
+                      {course.course_requirements?.map((req: CourseRequirementRow, index: number) => (
                         <li key={index} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                           <span className="text-gray-700">{req.requirement}</span>

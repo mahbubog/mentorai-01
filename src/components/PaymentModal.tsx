@@ -140,8 +140,8 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      // FIX 2: Explicitly cast payload
-      const { error: paymentError } = await supabase.from('payments').insert(paymentData as any);
+      // Removed 'as any' as PaymentsInsert is now correctly typed
+      const { error: paymentError } = await supabase.from('payments').insert(paymentData);
 
       if (paymentError) throw paymentError;
 
@@ -295,7 +295,7 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
                 </label>
                 <select
                   value={formData.payment_method}
-                  onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, payment_method: e.target.value as PaymentsInsert['payment_method'] })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent capitalize"
                 >
                   <option value="bkash">bKash</option>

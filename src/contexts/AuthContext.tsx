@@ -78,8 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         full_name: fullName,
         phone: phone,
       };
-      // FIX 1: Explicitly cast payload
-      const { error: profileError } = await supabase.from('profiles').insert(profileData as any);
+      // Removed 'as any' as ProfilesInsert is now correctly typed
+      const { error: profileError } = await supabase.from('profiles').insert(profileData);
 
       if (profileError) throw profileError;
     }
