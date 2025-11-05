@@ -57,10 +57,9 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         timestamp_seconds: 0, // Placeholder for future video integration
       };
 
-      // Wrap in array and cast to any for insert
       const { data, error } = await supabase
-        .from('user_notes' as const)
-        .insert([noteData] as any)
+        .from('user_notes')
+        .insert(noteData) // Use specific Insert type
         .select()
         .single();
 
@@ -98,10 +97,9 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         note_content: newContent,
       };
 
-      // Explicitly cast update payload to any
       await supabase
-        .from('user_notes' as const)
-        .update(updatePayload as any)
+        .from('user_notes')
+        .update(updatePayload) // Use specific Update type
         .eq('id', noteId);
       
       // Optimistically update state

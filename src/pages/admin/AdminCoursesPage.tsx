@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Pencil, Trash2, Eye, Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-react';
-import { CoursesUpdate, CourseRow, Database } from '../../lib/database.types';
+import { CoursesUpdate, CourseRow, CourseCategoryRow } from '../../lib/database.types'; // Removed unused Database
 
 // Extend CourseRow to include instructor name and categories
 interface CourseWithDetails extends CourseRow {
@@ -16,10 +16,7 @@ interface CourseWithDetails extends CourseRow {
   }[];
 }
 
-interface Category {
-  id: string;
-  name: string;
-}
+interface Category extends CourseCategoryRow {} // Use CourseCategoryRow from types
 
 export function AdminCoursesPage() {
   const [allCourses, setAllCourses] = useState<CourseWithDetails[]>([]);
@@ -155,17 +152,17 @@ export function AdminCoursesPage() {
     }
   };
 
-  const toggleStatus = async (id: string, currentStatus: string) => {
+  const toggleStatus = async (id: string, currentStatus: CourseRow['status']) => {
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     
     const updatePayload: CoursesUpdate = {
-      status: newStatus as CoursesUpdate['status'],
+      status: newStatus,
     };
 
     try {
       const { error } = await supabase
-        .from('courses' as const)
-        .update(updatePayload as any)
+        .from('courses')
+        .update(updatePayload) // Use specific Update type
         .eq('id', id);
 
       if (error) throw error;

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, CheckCircle, AlertCircle, MessageSquare, X, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationsInsert } from '../lib/database.types';
+import { NotificationsInsert, NotificationsUpdate } from '../lib/database.types';
 
 interface NotificationRow extends NotificationsInsert {
   id: string;
@@ -57,10 +57,12 @@ export function NotificationDropdown() {
 
   const markAsRead = async (id: string) => {
     try {
-      await supabase
-        .from('notifications' as const)
-        .update({ is_read: true } as any) // Explicitly cast payload to any
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true } as NotificationsUpdate) // Use specific Update type
         .eq('id', id);
+      
+      if (error) throw error;
       
       setNotifications(prev => 
         prev.map(n => n.id === id ? { ...n, is_read: true } : n)

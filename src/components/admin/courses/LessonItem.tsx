@@ -4,7 +4,7 @@ import { Label } from '../../ui/label';
 import { Textarea } from '../../ui/textarea';
 import { Checkbox } from '../../ui/checkbox';
 import { Button } from '../../ui/button';
-import { Plus, Trash2, Upload, XCircle } from 'lucide-react';
+import { Plus, Trash2, Upload } from 'lucide-react'; // Removed unused XCircle
 import { LessonFormData } from '../../../pages/admin/AdminCourseFormPage';
 
 interface LessonItemProps {
@@ -79,7 +79,7 @@ export function LessonItem({ lesson, onLessonChange }: LessonItemProps) {
         <Label htmlFor={`lesson-description-${lesson.id}`}>Lesson Description</Label>
         <Textarea
           id={`lesson-description-${lesson.id}`}
-          value={lesson.description}
+          value={lesson.description || ''}
           onChange={handleDescriptionChange}
           placeholder="Briefly describe this lesson"
           rows={2}
@@ -99,7 +99,7 @@ export function LessonItem({ lesson, onLessonChange }: LessonItemProps) {
         <Label htmlFor={`lesson-duration-${lesson.id}`}>Duration (e.g., 15 min)</Label>
         <Input
           id={`lesson-duration-${lesson.id}`}
-          value={lesson.duration}
+          value={lesson.duration || ''}
           onChange={handleDurationChange}
           placeholder="e.g., 15 min"
         />

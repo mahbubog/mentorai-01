@@ -58,6 +58,196 @@ export interface Database {
           created_at?: string
         }
       }
+      instructors: {
+        Row: {
+          id: string
+          name: string
+          bio: string | null
+          photo: string | null
+          credentials: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          bio?: string | null
+          photo?: string | null
+          credentials?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          bio?: string | null
+          photo?: string | null
+          credentials?: string | null
+          created_at?: string
+        }
+      }
+      course_categories: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          display_order: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          display_order?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          display_order?: number | null
+          created_at?: string
+        }
+      }
+      course_categories_mapping: {
+        Row: {
+          course_id: string
+          category_id: string
+        }
+        Insert: {
+          course_id: string
+          category_id: string
+        }
+        Update: {
+          course_id?: string
+          category_id?: string
+        }
+      }
+      course_requirements: {
+        Row: {
+          id: string
+          course_id: string
+          requirement: string
+          display_order: number | null
+        }
+        Insert: {
+          id?: string
+          course_id: string
+          requirement: string
+          display_order?: number | null
+        }
+        Update: {
+          id?: string
+          course_id?: string
+          requirement?: string
+          display_order?: number | null
+        }
+      }
+      course_learning_outcomes: {
+        Row: {
+          id: string
+          course_id: string
+          outcome: string
+          display_order: number | null
+        }
+        Insert: {
+          id?: string
+          course_id: string
+          outcome: string
+          display_order?: number | null
+        }
+        Update: {
+          id?: string
+          course_id?: string
+          outcome?: string
+          display_order?: number | null
+        }
+      }
+      course_sections: {
+        Row: {
+          id: string
+          course_id: string
+          title: string
+          description: string | null
+          display_order: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          course_id: string
+          title: string
+          description?: string | null
+          display_order?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          course_id?: string
+          title?: string
+          description?: string | null
+          display_order?: number | null
+          created_at?: string
+        }
+      }
+      course_lessons: {
+        Row: {
+          id: string
+          section_id: string
+          title: string
+          description: string | null
+          video_url: string
+          duration: string | null
+          is_preview: boolean | null
+          display_order: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          section_id: string
+          title: string
+          description?: string | null
+          video_url: string
+          duration?: string | null
+          is_preview?: boolean | null
+          display_order?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          section_id?: string
+          title?: string
+          description?: string | null
+          video_url?: string
+          duration?: string | null
+          is_preview?: boolean | null
+          display_order?: number | null
+          created_at?: string
+        }
+      }
+      lesson_resources: {
+        Row: {
+          id: string
+          lesson_id: string
+          title: string
+          file_url: string
+          file_type: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          lesson_id: string
+          title: string
+          file_url: string
+          file_type?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          lesson_id?: string
+          title?: string
+          file_url?: string
+          file_type?: string | null
+          created_at?: string
+        }
+      }
       courses: {
         Row: {
           id: string
@@ -90,6 +280,8 @@ export interface Database {
           enrolled_count: number
           created_at: string
           updated_at: string
+          meta_title: string | null // Added
+          meta_description: string | null // Added
         }
         Insert: {
           id?: string
@@ -122,6 +314,8 @@ export interface Database {
           enrolled_count?: number
           created_at?: string
           updated_at?: string
+          meta_title?: string | null // Added
+          meta_description?: string | null // Added
         }
         Update: {
           id?: string
@@ -154,6 +348,8 @@ export interface Database {
           enrolled_count?: number
           created_at?: string
           updated_at?: string
+          meta_title?: string | null // Added
+          meta_description?: string | null // Added
         }
       }
       payments: {
@@ -370,3 +566,36 @@ export type EnrollmentRow = Database['public']['Tables']['enrollments']['Row'];
 export type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 export type LessonProgressRow = Database['public']['Tables']['lesson_progress']['Row'];
 export type UserNoteRow = Database['public']['Tables']['user_notes']['Row'];
+
+// New types for admin course form
+export type InstructorRow = Database['public']['Tables']['instructors']['Row'];
+export type InstructorsInsert = Database['public']['Tables']['instructors']['Insert'];
+export type InstructorsUpdate = Database['public']['Tables']['instructors']['Update'];
+
+export type CourseCategoryRow = Database['public']['Tables']['course_categories']['Row'];
+export type CourseCategoryInsert = Database['public']['Tables']['course_categories']['Insert'];
+export type CourseCategoryUpdate = Database['public']['Tables']['course_categories']['Update'];
+
+export type CourseCategoriesMappingRow = Database['public']['Tables']['course_categories_mapping']['Row'];
+export type CourseCategoriesMappingInsert = Database['public']['Tables']['course_categories_mapping']['Insert'];
+export type CourseCategoriesMappingUpdate = Database['public']['Tables']['course_categories_mapping']['Update'];
+
+export type CourseRequirementRow = Database['public']['Tables']['course_requirements']['Row'];
+export type CourseRequirementInsert = Database['public']['Tables']['course_requirements']['Insert'];
+export type CourseRequirementUpdate = Database['public']['Tables']['course_requirements']['Update'];
+
+export type CourseLearningOutcomeRow = Database['public']['Tables']['course_learning_outcomes']['Row'];
+export type CourseLearningOutcomeInsert = Database['public']['Tables']['course_learning_outcomes']['Insert'];
+export type CourseLearningOutcomeUpdate = Database['public']['Tables']['course_learning_outcomes']['Update'];
+
+export type CourseSectionRow = Database['public']['Tables']['course_sections']['Row'];
+export type CourseSectionInsert = Database['public']['Tables']['course_sections']['Insert'];
+export type CourseSectionUpdate = Database['public']['Tables']['course_sections']['Update'];
+
+export type CourseLessonRow = Database['public']['Tables']['course_lessons']['Row'];
+export type CourseLessonInsert = Database['public']['Tables']['course_lessons']['Insert'];
+export type CourseLessonUpdate = Database['public']['Tables']['course_lessons']['Update'];
+
+export type LessonResourceRow = Database['public']['Tables']['lesson_resources']['Row'];
+export type LessonResourceInsert = Database['public']['Tables']['lesson_resources']['Insert'];
+export type LessonResourceUpdate = Database['public']['Tables']['lesson_resources']['Update'];

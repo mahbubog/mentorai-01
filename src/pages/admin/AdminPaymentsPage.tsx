@@ -3,7 +3,7 @@ import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { CheckCircle, XCircle, Eye } from 'lucide-react';
-import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert, Database } from '../../lib/database.types';
+import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert } from '../../lib/database.types'; // Removed unused Database
 
 export function AdminPaymentsPage() {
   const { user } = useAuth();
@@ -50,10 +50,9 @@ export function AdminPaymentsPage() {
         approved_at: new Date().toISOString(),
       };
 
-      // Explicitly cast update payload to any
       const { error: paymentError } = await supabase
-        .from('payments' as const)
-        .update(paymentUpdate as any)
+        .from('payments')
+        .update(paymentUpdate) // Use specific Update type
         .eq('id', paymentId);
 
       if (paymentError) throw paymentError;
@@ -64,8 +63,7 @@ export function AdminPaymentsPage() {
         payment_id: paymentId,
       };
 
-      // Wrap in array and cast to any for insert
-      const { error: enrollmentError } = await supabase.from('enrollments' as const).insert([enrollmentData] as any);
+      const { error: enrollmentError } = await supabase.from('enrollments').insert(enrollmentData); // Use specific Insert type
 
       if (enrollmentError) throw enrollmentError;
 
@@ -76,8 +74,7 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      // Wrap in array and cast to any for insert
-      await supabase.from('notifications' as const).insert([notificationData] as any);
+      await supabase.from('notifications').insert(notificationData); // Use specific Insert type
 
       alert('Payment approved successfully!');
       loadPayments();
@@ -97,10 +94,9 @@ export function AdminPaymentsPage() {
         rejection_reason: reason,
       };
 
-      // Explicitly cast update payload to any
       const { error } = await supabase
-        .from('payments' as const)
-        .update(paymentUpdate as any)
+        .from('payments')
+        .update(paymentUpdate) // Use specific Update type
         .eq('id', paymentId);
 
       if (error) throw error;
@@ -112,8 +108,7 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      // Wrap in array and cast to any for insert
-      await supabase.from('notifications' as const).insert([notificationData] as any);
+      await supabase.from('notifications').insert(notificationData); // Use specific Insert type
 
       alert('Payment rejected successfully!');
       loadPayments();

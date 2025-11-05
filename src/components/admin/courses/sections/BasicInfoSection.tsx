@@ -2,17 +2,18 @@ import { ChangeEvent, useCallback, useState, useEffect } from 'react';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
-import { Upload, Image, Video, XCircle } from 'lucide-react';
-import { slugify } from '../../../utils/slugify';
+import { Upload, XCircle } from 'lucide-react'; // Removed unused Image, Video
+import { slugify } from '../../../../utils/slugify';
+import { Button } from '../../../ui/button'; // Added Button import
 
 interface BasicInfoSectionProps {
   title: string;
   slug: string;
-  short_description: string;
-  full_description: string;
-  thumbnail: string;
-  preview_video: string;
-  onFieldChange: (field: keyof any, value: any) => void;
+  short_description: string | null; // Allow null
+  full_description: string | null; // Allow null
+  thumbnail: string | null; // Allow null
+  preview_video: string | null; // Allow null
+  onFieldChange: (field: keyof any, value: any) => void; // Keep as any for flexibility, or define specific keys
 }
 
 export function BasicInfoSection({
@@ -117,14 +118,14 @@ export function BasicInfoSection({
         <Label htmlFor="short_description">Short Description <span className="text-red-500">*</span></Label>
         <Textarea
           id="short_description"
-          value={short_description}
+          value={short_description || ''}
           onChange={handleShortDescriptionChange}
           placeholder="A brief overview of the course (max 160 characters)"
           maxLength={160}
           required
         />
         <p className="text-sm text-gray-500 mt-1">
-          {short_description.length} / 160 characters
+          {short_description?.length || 0} / 160 characters
         </p>
       </div>
 
@@ -132,7 +133,7 @@ export function BasicInfoSection({
         <Label htmlFor="full_description">Full Description</Label>
         <Textarea
           id="full_description"
-          value={full_description}
+          value={full_description || ''}
           onChange={handleFullDescriptionChange}
           placeholder="Provide a detailed description of the course content, target audience, etc."
           rows={8}
@@ -177,7 +178,7 @@ export function BasicInfoSection({
         <Input
           id="preview_video_url"
           type="text"
-          value={preview_video.startsWith('blob:') ? '' : preview_video}
+          value={preview_video?.startsWith('blob:') ? '' : preview_video || ''}
           onChange={handlePreviewVideoUrlChange}
           placeholder="Enter YouTube/Vimeo URL or upload a file"
           className="mb-2"

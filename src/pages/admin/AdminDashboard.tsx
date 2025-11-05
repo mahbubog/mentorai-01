@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { Users, BookOpen, DollarSign, Clock, Activity, UserPlus, Plus, Eye, FileText } from 'lucide-react'; // Removed unused imports
-import { PaymentRow, ProfileRow } from '../../lib/database.types'; // Removed unused EnrollmentRow, CourseRow, Database
+import { Users, BookOpen, DollarSign, Clock, Activity, UserPlus, Plus, Eye, FileText } from 'lucide-react';
+import { PaymentRow, ProfileRow } from '../../lib/database.types';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
@@ -334,7 +334,7 @@ export function AdminDashboard() {
                   dataKey="value"
                   label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`} // Explicitly typed percent
                 >
-                  {mockEnrollmentsByCategoryData.map((_, index) => ( // Replaced entry with _
+                  {mockEnrollmentsByCategoryData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
