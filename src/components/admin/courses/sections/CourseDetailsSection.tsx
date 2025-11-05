@@ -2,8 +2,8 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
-import { MultiSelect } from '../../../ui/multi-select'; // Assuming a MultiSelect component
-import { supabase } from '../../../../lib/supabase'; // Corrected import path
+import { MultiSelect } from '../../../ui/multi-select';
+import { supabase } from '../../../../lib/supabase';
 import { CourseRow } from '../../../../lib/database.types';
 
 interface CourseDetailsSectionProps {

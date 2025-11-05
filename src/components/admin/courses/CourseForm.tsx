@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CourseFormData, LessonFormData, SectionFormData } from '../../../pages/admin/AdminCourseFormPage';
+import { CourseFormData, SectionFormData } from '../../../pages/admin/AdminCourseFormPage'; // Removed unused LessonFormData
 import { BasicInfoSection } from './sections/BasicInfoSection';
 import { CourseDetailsSection } from './sections/CourseDetailsSection';
 import { LiveCourseDetailsSection } from './sections/LiveCourseDetailsSection';
@@ -11,7 +11,7 @@ import { LearningOutcomesSection } from './sections/LearningOutcomesSection';
 import { SeoSection } from './sections/SeoSection';
 import { PublishingOptionsSection } from './sections/PublishingOptionsSection';
 import { Button } from '../../ui/button'; // Assuming shadcn/ui Button
-import { Loader2 } from 'lucide-react';
+// Removed unused Loader2
 
 interface CourseFormProps {
   initialData: CourseFormData;
@@ -27,7 +27,7 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
     setFormData(initialData);
   }, [initialData]);
 
-  const handleFieldChange = useCallback((field: keyof CourseFormData, value: any) => {
+  const handleFieldChange = useCallback((field: string, value: any) => { // Changed field type to string
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
@@ -91,6 +91,7 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
         instructor_id={formData.instructor_id}
         instructor_name={formData.instructor_name}
         instructor_bio={formData.instructor_bio}
+        instructor_credentials={formData.instructor_credentials} // Added missing prop
         onFieldChange={handleFieldChange}
       />
 
@@ -114,8 +115,8 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
       />
 
       <SeoSection
-        meta_title={formData.meta_title}
-        meta_description={formData.meta_description}
+        meta_title={formData.meta_title || ''} // Handle null
+        meta_description={formData.meta_description || ''} // Handle null
         onFieldChange={handleFieldChange}
       />
 

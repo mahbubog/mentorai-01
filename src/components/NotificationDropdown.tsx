@@ -59,7 +59,7 @@ export function NotificationDropdown() {
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ is_read: true } as NotificationsUpdate) // Use specific Update type
+        .update({ is_read: true }) // Removed 'as NotificationsUpdate' as it's now correctly inferred
         .eq('id', id);
       
       if (error) throw error;

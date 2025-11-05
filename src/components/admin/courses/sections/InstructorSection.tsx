@@ -4,15 +4,16 @@ import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
 import { Textarea } from '../../../ui/textarea';
 import { Button } from '../../../ui/button';
-import { Plus, Upload, XCircle } from 'lucide-react';
-import { supabase } from '../../../../lib/supabase'; // Corrected import path
-import { InstructorRow } from '../../../../lib/database.types';
+import { Upload, XCircle } from 'lucide-react'; // Removed unused Plus
+import { supabase } from '../../../../lib/supabase';
+// Removed unused InstructorRow
 
 interface InstructorSectionProps {
   instructor_id: string | null;
-  instructor_name?: string;
-  instructor_bio?: string;
-  onFieldChange: (field: keyof any, value: any) => void;
+  instructor_name?: string | null; // Allow null
+  instructor_bio?: string | null;
+  instructor_credentials?: string | null;
+  onFieldChange: (field: string, value: any) => void; // Changed to string for flexibility
 }
 
 interface InstructorOption {
@@ -24,12 +25,13 @@ export function InstructorSection({
   instructor_id,
   instructor_name,
   instructor_bio,
+  instructor_credentials,
   onFieldChange,
 }: InstructorSectionProps) {
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
   const [loadingInstructors, setLoadingInstructors] = useState(true);
   const [showNewInstructorForm, setShowNewInstructorForm] = useState(false);
-  const [newInstructorPhoto, setNewInstructorPhoto] = useState<File | null>(null);
+  // Removed unused newInstructorPhoto
   const [newInstructorPhotoUrl, setNewInstructorPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,11 +70,11 @@ export function InstructorSection({
       onFieldChange('instructor_id', value);
       setShowNewInstructorForm(false);
       // Clear new instructor form fields if an existing one is selected
-      onFieldChange('instructor_name', '');
-      onFieldChange('instructor_bio', '');
-      onFieldChange('instructor_credentials', '');
+      onFieldChange('instructor_name', null);
+      onFieldChange('instructor_bio', null);
+      onFieldChange('instructor_credentials', null);
       onFieldChange('instructor_photo', undefined);
-      setNewInstructorPhoto(null);
+      // setNewInstructorPhoto(null); // Removed as newInstructorPhoto is unused
       setNewInstructorPhotoUrl(null);
     }
   }, [onFieldChange]);
@@ -92,7 +94,7 @@ export function InstructorSection({
   const handleNewInstructorPhotoUpload = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setNewInstructorPhoto(file);
+      // setNewInstructorPhoto(file); // Removed as newInstructorPhoto is unused
       setNewInstructorPhotoUrl(URL.createObjectURL(file));
       onFieldChange('instructor_photo', file);
     }
@@ -148,6 +150,7 @@ export function InstructorSection({
             <Label htmlFor="new_instructor_credentials">Credentials</Label>
             <Input
               id="new_instructor_credentials"
+              value={instructor_credentials || ''} // Ensure value is controlled
               onChange={handleNewInstructorCredentialsChange}
               placeholder="e.g., PhD in Computer Science"
             />
@@ -174,7 +177,7 @@ export function InstructorSection({
                 <button
                   type="button"
                   onClick={() => {
-                    setNewInstructorPhoto(null);
+                    // setNewInstructorPhoto(null); // Removed as newInstructorPhoto is unused
                     setNewInstructorPhotoUrl(null);
                     onFieldChange('instructor_photo', undefined);
                   }}

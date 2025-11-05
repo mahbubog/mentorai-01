@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 import { Button } from '../../../ui/button';
-import { Label } from '../../../ui/label';
 import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
-import { SectionFormData } from '../../../pages/admin/AdminCourseFormPage';
+import { SectionFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Corrected import path
 import { CourseSectionItem } from '../CourseSectionItem';
 
 interface CurriculumSectionProps {

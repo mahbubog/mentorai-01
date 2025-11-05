@@ -3,7 +3,7 @@ import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
 import { Checkbox } from '../../../ui/checkbox';
 import { Button } from '../../../ui/button';
-import { Loader2, Eye } from 'lucide-react';
+import { Loader2 } from 'lucide-react'; // Removed unused Eye
 import { CourseRow } from '../../../../lib/database.types';
 
 interface PublishingOptionsSectionProps {
