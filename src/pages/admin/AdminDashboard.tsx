@@ -2,9 +2,16 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
+import { Users, BookOpen, DollarSign, Clock } from 'lucide-react';
 import { PaymentRow } from '../../lib/database.types';
 
 export function AdminDashboard() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalCourses: 0,
+    pendingPayments: 0,
+    totalRevenue: 0,
+  });
   const [recentPayments, setRecentPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,6 +21,27 @@ export function AdminDashboard() {
 
   const loadDashboardData = async () => {
     try {
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: coursesCount } = await supabase
+        .from('courses')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'published');
+
+      const { count: pendingCount } = await supabase
+        .from('payments')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      const { data: approvedPayments } = await supabase
+        .from('payments')
+        .select('amount')
+        .eq('status', 'approved');
+
+      const revenue = (approvedPayments as PaymentRow[] | null)?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+
       const { data: payments } = await supabase
         .from('payments')
         .select(`
@@ -24,6 +52,13 @@ export function AdminDashboard() {
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
         .limit(5);
+
+      setStats({
+        totalUsers: usersCount || 0,
+        totalCourses: coursesCount || 0,
+        pendingPayments: pendingCount || 0,
+        totalRevenue: revenue,
+      });
 
       setRecentPayments(payments || []);
     } catch (error) {
@@ -38,7 +73,39 @@ export function AdminDashboard() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
 
-        {/* Quick stats are now in AdminLayout via AdminTopBarStats component */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-500 text-sm font-medium">Total Users</h3>
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-500 text-sm font-medium">Total Courses</h3>
+              <BookOpen className="h-8 w-8 text-green-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{stats.totalCourses}</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-500 text-sm font-medium">Pending Payments</h3>
+              <Clock className="h-8 w-8 text-yellow-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{stats.pendingPayments}</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-500 text-sm font-medium">Total Revenue</h3>
+              <DollarSign className="h-8 w-8 text-purple-600" />
+            </div>
+            <p className="text-3xl font-bold text-gray-900">৳{stats.totalRevenue}</p>
+          </div>
+        </div>
 
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b flex items-center justify-between">
