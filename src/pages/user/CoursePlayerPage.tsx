@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { CourseRow, LessonProgressInsert, LessonProgressRow } from '../../lib/database.types';
 import { CoursePlayerSidebar } from '../../components/course/CoursePlayerSidebar';
 import { LessonContent } from '../../components/course/LessonContent';
+import { LiveCourseContent } from '../../components/course/LiveCourseContent';
 
 interface Lesson {
   id: string;
@@ -67,64 +68,67 @@ export function CoursePlayerPage() {
 
       if (courseError) throw courseError;
       
-      // Fix 7: Explicitly cast courseData to CourseRow to access properties
       const typedCourseData = courseData as CourseRow | null;
 
-      if (!typedCourseData || typedCourseData.course_type !== 'recorded') {
-        // Only recorded courses use this player structure
+      if (!typedCourseData) {
         navigate('/my-courses', { replace: true });
         return;
       }
 
-      // 3. Fetch Curriculum
-      const { data: sectionsData } = await supabase
-        .from('course_sections')
-        .select(`
-          id,
-          title,
-          course_lessons (id, title, description, duration, video_url)
-        `)
-        .eq('course_id', courseId)
-        .order('display_order');
+      let sectionsArray: Section[] = [];
+      let progressMap: Record<string, boolean> = {};
 
-      const sectionsArray = (sectionsData || []) as Section[];
+      if (typedCourseData.course_type === 'recorded') {
+        // 3. Fetch Curriculum (only for recorded courses)
+        const { data: sectionsData } = await supabase
+          .from('course_sections')
+          .select(`
+            id,
+            title,
+            course_lessons (id, title, description, duration, video_url)
+          `)
+          .eq('course_id', courseId)
+          .order('display_order');
 
-      // 4. Fetch Progress
-      const { data: progressData } = await supabase
-        .from('lesson_progress')
-        .select('*')
-        .eq('user_id', user.id);
+        sectionsArray = (sectionsData || []) as Section[];
 
-      const progressMap: Record<string, boolean> = {};
-      (progressData as LessonProgressRow[])?.forEach((p) => {
-        progressMap[p.lesson_id] = p.completed;
-      });
-      setProgress(progressMap);
+        // 4. Fetch Progress (only for recorded courses)
+        const { data: progressData } = await supabase
+          .from('lesson_progress')
+          .select('*')
+          .eq('user_id', user.id);
 
-      // Fix 8: Spread typedCourseData
+        (progressData as LessonProgressRow[])?.forEach((p) => {
+          progressMap[p.lesson_id] = p.completed;
+        });
+        setProgress(progressMap);
+      }
+      
       const fullCourse: CoursePlayerCourse = {
         ...typedCourseData,
         sections: sectionsArray,
       };
       setCourse(fullCourse);
 
-      // 5. Set initial lesson (first incomplete, or first overall)
-      let initialLesson: Lesson | null = null;
-      for (const section of sectionsArray) {
-        for (const lesson of section.course_lessons) {
-          if (!progressMap[lesson.id]) {
-            initialLesson = lesson;
-            break;
+      // 5. Set initial lesson (only for recorded courses)
+      if (typedCourseData.course_type === 'recorded') {
+        let initialLesson: Lesson | null = null;
+        for (const section of sectionsArray) {
+          for (const lesson of section.course_lessons) {
+            if (!progressMap[lesson.id]) {
+              initialLesson = lesson;
+              break;
+            }
           }
+          if (initialLesson) break;
         }
-        if (initialLesson) break;
+
+        if (!initialLesson && sectionsArray.length > 0) {
+          initialLesson = sectionsArray[0].course_lessons[0];
+        }
+        setCurrentLesson(initialLesson);
       }
 
-      if (!initialLesson && sectionsArray.length > 0) {
-        initialLesson = sectionsArray[0].course_lessons[0];
-      }
-
-      setCurrentLesson(initialLesson);
     } catch (error) {
       console.error('Error loading course:', error);
     } finally {
@@ -145,7 +149,6 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      // Fix 9: Remove array wrapper
       await supabase.from('lesson_progress' as const).upsert(upsertData);
 
       setProgress({ ...progress, [lessonId]: true });
@@ -193,53 +196,62 @@ export function CoursePlayerPage() {
     );
   }
 
+  const isRecorded = course.course_type === 'recorded';
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
-        {/* Main Content Area (Video + Lesson Details) */}
-        <div className="flex-1 flex flex-col overflow-y-auto">
-          {/* Video Player */}
-          <div className="flex-shrink-0 aspect-video bg-black">
-            {currentLesson ? (
-              <iframe
-                src={getYouTubeEmbedUrl(currentLesson.video_url)}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-white">
-                <p>No lessons available for this course.</p>
-              </div>
-            )}
+      {isRecorded ? (
+        <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
+          {/* Main Content Area (Video + Lesson Details) */}
+          <div className="flex-1 flex flex-col overflow-y-auto">
+            {/* Video Player */}
+            <div className="flex-shrink-0 aspect-video bg-black">
+              {currentLesson ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(currentLesson.video_url)}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white">
+                  <p>No lessons available for this course.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Lesson Content & Tabs */}
+            <div className="flex-1 bg-white">
+              {currentLesson && (
+                <LessonContent
+                  lesson={currentLesson}
+                  course={course}
+                  isCompleted={progress[currentLesson.id] || false}
+                  onMarkComplete={markLessonComplete}
+                  onNextLesson={handleNextLesson}
+                  hasNextLesson={hasNextLesson}
+                />
+              )}
+            </div>
           </div>
 
-          {/* Lesson Content & Tabs */}
-          <div className="flex-1 bg-white">
-            {currentLesson && (
-              <LessonContent
-                lesson={currentLesson}
-                course={course}
-                isCompleted={progress[currentLesson.id] || false}
-                onMarkComplete={markLessonComplete}
-                onNextLesson={handleNextLesson}
-                hasNextLesson={hasNextLesson}
-              />
-            )}
-          </div>
+          {/* Sidebar (Curriculum) */}
+          <CoursePlayerSidebar
+            courseTitle={course.title}
+            sections={course.sections}
+            currentLesson={currentLesson}
+            progress={progress}
+            onLessonSelect={setCurrentLesson}
+          />
         </div>
-
-        {/* Sidebar (Curriculum) */}
-        <CoursePlayerSidebar
-          courseTitle={course.title}
-          sections={course.sections}
-          currentLesson={currentLesson}
-          progress={progress}
-          onLessonSelect={setCurrentLesson}
-        />
-      </div>
+      ) : (
+        // Live Course Content
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <LiveCourseContent course={course} />
+        </div>
+      )}
     </div>
   );
 }
