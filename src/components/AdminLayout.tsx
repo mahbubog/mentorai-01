@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './Header';
-import { LayoutDashboard, BookOpen, CreditCard, Users } from 'lucide-react';
+import { LayoutDashboard, BookOpen, CreditCard, Users, FileText, Settings, LogOut, FolderOpen } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -9,13 +10,27 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const navItems = [
-    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/courses', icon: BookOpen, label: 'Courses' },
-    { path: '/admin/payments', icon: CreditCard, label: 'Payments' },
-    { path: '/admin/users', icon: Users, label: 'Users' },
+    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard Home' },
+    { path: '/admin/courses', icon: BookOpen, label: 'Courses Management' },
+    { path: '/admin/users', icon: Users, label: 'Users Management' },
+    { path: '/admin/payments', icon: CreditCard, label: 'Payments Management' },
+    { path: '/admin/pages', icon: FileText, label: 'Pages Management' },
+    { path: '/admin/content', icon: FolderOpen, label: 'Content Management' },
+    { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -43,6 +58,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     </Link>
                   );
                 })}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition text-left text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="font-medium">Logout</span>
+                </button>
               </nav>
             </div>
           </aside>
