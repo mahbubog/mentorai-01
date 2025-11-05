@@ -113,7 +113,7 @@ export function AdminCategoriesPage() {
 
       const { error: insertError } = await supabase
         .from('course_categories')
-        .insert([categoryData] as CourseCategoryInsert[]); // Fix Error 29
+        .insert([categoryData] as CourseCategoryInsert[]); // Fix Error 27
 
       if (insertError) throw insertError;
 
@@ -160,7 +160,7 @@ export function AdminCategoriesPage() {
 
       const { error: updateError } = await supabase
         .from('course_categories')
-        .update(updateData as CourseCategoryUpdate) // Fix Error 30
+        .update(updateData as CourseCategoryUpdate) // Fix Error 28
         .eq('id', editingCategory.id);
 
       if (updateError) throw updateError;
@@ -235,7 +235,7 @@ export function AdminCategoriesPage() {
 
       const { error: updateError } = await supabase
         .from('course_categories')
-        .upsert(updates as CourseCategoryUpdate[], { onConflict: 'id' }); // Fix Error 31
+        .upsert(updates as CourseCategoryUpdate[], { onConflict: 'id' }); // Fix Error 29
 
       if (updateError) throw updateError;
 

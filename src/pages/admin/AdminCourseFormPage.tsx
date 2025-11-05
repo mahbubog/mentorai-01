@@ -253,7 +253,7 @@ export function AdminCourseFormPage() {
         };
         const { data: newInstructor, error: instructorError } = await supabase
           .from('instructors')
-          .insert([instructorPayload] as InstructorsInsert[]) // Fix Error 17
+          .insert([instructorPayload] as InstructorsInsert[]) // Fix Error 15
           .select('id')
           .single();
 
@@ -305,13 +305,13 @@ export function AdminCourseFormPage() {
       if (currentCourseId) {
         const { error: updateError } = await supabase
           .from('courses')
-          .update(coursePayload as CoursesUpdate) // Fix Error 18
+          .update(coursePayload as CoursesUpdate) // Fix Error 16
           .eq('id', currentCourseId);
         if (updateError) throw updateError;
       } else {
         const { data: newCourse, error: insertError } = await supabase
           .from('courses')
-          .insert([coursePayload as CoursesInsert] as CoursesInsert[]) // Fix Error 19
+          .insert([coursePayload as CoursesInsert] as CoursesInsert[]) // Fix Error 17
           .select('id')
           .single();
         if (insertError) throw insertError;
@@ -327,7 +327,7 @@ export function AdminCourseFormPage() {
           course_id: currentCourseId!,
           category_id: catId,
         }));
-        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings as CourseCategoriesMappingInsert[]); // Fix Error 20
+        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings as CourseCategoriesMappingInsert[]); // Fix Error 18
         if (categoryError) throw categoryError;
       }
 
@@ -339,7 +339,7 @@ export function AdminCourseFormPage() {
           requirement: req.requirement,
           display_order: index,
         }));
-        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload as CourseRequirementInsert[]); // Fix Error 21
+        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload as CourseRequirementInsert[]); // Fix Error 19
         if (reqError) throw reqError;
       }
 
@@ -351,7 +351,7 @@ export function AdminCourseFormPage() {
           outcome: out.outcome,
           display_order: index,
         }));
-        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload as CourseLearningOutcomeInsert[]); // Fix Error 22
+        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload as CourseLearningOutcomeInsert[]); // Fix Error 20
         if (outError) throw outError;
       }
 
@@ -376,13 +376,13 @@ export function AdminCourseFormPage() {
           if (currentSectionId) {
             const { error: updateError } = await supabase
               .from('course_sections')
-              .update(sectionPayload as CourseSectionUpdate) // Fix Error 23
+              .update(sectionPayload as CourseSectionUpdate) // Fix Error 21
               .eq('id', currentSectionId);
             if (updateError) throw updateError;
           } else {
             const { data: newSection, error: insertError } = await supabase
               .from('course_sections')
-              .insert([sectionPayload as CourseSectionInsert] as CourseSectionInsert[]) // Fix Error 24
+              .insert([sectionPayload as CourseSectionInsert] as CourseSectionInsert[]) // Fix Error 22
               .select('id')
               .single();
             if (insertError) throw insertError;
@@ -413,13 +413,13 @@ export function AdminCourseFormPage() {
             if (currentLessonId) {
               const { error: updateError } = await supabase
                 .from('course_lessons')
-                .update(lessonPayload as CourseLessonUpdate) // Fix Error 25
+                .update(lessonPayload as CourseLessonUpdate) // Fix Error 23
                 .eq('id', currentLessonId);
               if (updateError) throw updateError;
             } else {
               const { data: newLesson, error: insertError } = await supabase
                 .from('course_lessons')
-                .insert([lessonPayload as CourseLessonInsert] as CourseLessonInsert[]) // Fix Error 26
+                .insert([lessonPayload as CourseLessonInsert] as CourseLessonInsert[]) // Fix Error 24
                 .select('id')
                 .single();
               if (insertError) throw insertError;
@@ -451,13 +451,13 @@ export function AdminCourseFormPage() {
               if (resource.id) {
                 const { error: updateError } = await supabase
                   .from('lesson_resources')
-                  .update(resourcePayload as LessonResourceUpdate) // Fix Error 27
+                  .update(resourcePayload as LessonResourceUpdate) // Fix Error 25
                   .eq('id', resource.id);
                 if (updateError) throw updateError;
               } else {
                 const { error: insertError } = await supabase
                   .from('lesson_resources')
-                  .insert([resourcePayload as LessonResourceInsert] as LessonResourceInsert[]); // Fix Error 28
+                  .insert([resourcePayload as LessonResourceInsert] as LessonResourceInsert[]); // Fix Error 26
                 if (insertError) throw insertError;
               }
             }
