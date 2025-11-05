@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
+import { supabaseAdmin } from '../../lib/supabaseAdmin'; // Import the admin client
 import { Phone, Search, Download, Pencil, Ban, Trash2, Eye } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -40,8 +41,8 @@ export function AdminUsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // 1. Fetch all Auth Users (provides email, last_sign_in_at, banned_until)
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      // 1. Fetch all Auth Users using the privileged Admin client
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
       
       if (authError) {
         console.error('Supabase Auth Admin Error:', authError);
@@ -49,14 +50,14 @@ export function AdminUsersPage() {
       }
 
       const authUsersMap = new Map(
-        authData.users.map((u: any) => [u.id, { // Cast u to any to access admin properties (Fix Error 15)
+        authData.users.map((u: any) => [u.id, {
           email: u.email || 'N/A',
           last_sign_in_at: u.last_sign_in_at,
           banned_until: u.banned_until,
         }])
       );
 
-      // 2. Fetch Profiles and Enrollments (requires RLS on profiles/enrollments for admin)
+      // 2. Fetch Profiles and Enrollments (using the standard client, relying on RLS for admin access)
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -71,7 +72,7 @@ export function AdminUsersPage() {
 
       if (profilesError) throw profilesError;
 
-      // 3. Merge data (Fix Errors 16 & 17)
+      // 3. Merge data
       const usersData: UserProfile[] = (profilesData || [])
         .map((profile: any) => {
           const authInfo = authUsersMap.get(profile.id);
@@ -153,7 +154,8 @@ export function AdminUsersPage() {
     if (!confirm(`Are you sure you want to ${actionText} this user?`)) return;
 
     try {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
+      // Use supabaseAdmin for privileged action
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         ban_duration: newBanDuration,
       } as any); 
 
@@ -171,7 +173,7 @@ export function AdminUsersPage() {
     if (!confirm(`Are you sure you want to permanently delete user "${userName || userId}"? This action cannot be undone.`)) return;
 
     try {
-      // 1. Delete the profile data, which should cascade to related tables (enrollments, notes, etc.)
+      // 1. Delete the profile data, which should cascade to related tables (using standard client/RLS)
       const { error: profileDeleteError } = await supabase
         .from('profiles')
         .delete()
@@ -182,8 +184,8 @@ export function AdminUsersPage() {
         throw new Error("Failed to delete user profile data. " + profileDeleteError.message);
       }
       
-      // 2. Attempt to delete the auth user entry (requires admin privileges)
-      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
+      // 2. Attempt to delete the auth user entry (using privileged Admin client)
+      const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
       if (authDeleteError) {
         console.error("Error deleting auth user:", authDeleteError);
