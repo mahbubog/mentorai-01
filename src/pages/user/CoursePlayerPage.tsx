@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { CourseRow, LessonProgressInsert, LessonProgressRow, CourseLessonRow, CourseSectionRow } from '../../lib/database.types'; // Added missing types
+import { CourseRow, LessonProgressInsert, LessonProgressRow, CourseLessonRow, CourseSectionRow } from '../../lib/database.types';
 import { CoursePlayerSidebar } from '../../components/course/CoursePlayerSidebar';
 import { LessonContent } from '../../components/course/LessonContent';
 import { LiveCourseContent } from '../../components/course/LiveCourseContent';
 
-interface Lesson extends CourseLessonRow {} // Use CourseLessonRow
+interface Lesson extends CourseLessonRow {}
 
-interface Section extends CourseSectionRow { // Use CourseSectionRow
+interface Section extends CourseSectionRow {
   course_lessons: Lesson[];
 }
 
@@ -143,7 +143,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress').upsert(upsertData); // Removed 'as any'
+      await supabase.from('lesson_progress').upsert([upsertData]);
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete

@@ -4,7 +4,7 @@ import { UserLayout } from '../../components/UserLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Play, Clock, CheckCircle, XCircle, Award } from 'lucide-react';
-import { CourseRow, PaymentsRow, EnrollmentsRow } from '../../lib/database.types'; // Added missing types
+import { CourseRow, PaymentRow, EnrollmentRow } from '../../lib/database.types'; // Corrected imports
 
 // Define the unified structure for display
 interface UserCourse {
@@ -48,7 +48,7 @@ export function MyCoursesPage() {
 
       if (error) throw error;
 
-      const mappedCourses: UserCourse[] = (paymentsData || []).map((p: PaymentsRow & { courses: CourseRow, enrollments: EnrollmentsRow[] }) => {
+      const mappedCourses: UserCourse[] = (paymentsData || []).map((p: PaymentRow & { courses: CourseRow, enrollments: EnrollmentRow[] }) => {
         const enrollment = p.enrollments?.[0];
         const progress = enrollment?.progress_percentage || 0;
         const paymentStatus = p.status;
@@ -228,12 +228,12 @@ export function MyCoursesPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500 mb-4">No courses found matching your criteria.</p>
+            <p className="text-gray-500 mb-4">You haven't enrolled in any courses yet.</p>
             <Link
               to="/courses"
               className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
             >
-              Browse Courses
+                Browse Courses
             </Link>
           </div>
         )}

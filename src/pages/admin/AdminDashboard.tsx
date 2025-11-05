@@ -331,7 +331,7 @@ export function AdminDashboard() {
                   labelLine={false}
                   outerRadius={100}
                   fill="#8884d8"
-                  label={({ name, percent }: PieLabelRenderProps) => `${name} ${((percent || 0) * 100).toFixed(0)}%`} // Corrected type for label prop
+                  label={({ name, percent }: PieLabelRenderProps) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                   dataKey="value"
                 >
                   {mockEnrollmentsByCategoryData.map((_, index) => (

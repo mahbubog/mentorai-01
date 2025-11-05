@@ -104,6 +104,8 @@ type CourseLoadData = CourseRow & {
   })[];
 };
 
+const LOCAL_STORAGE_KEY = 'adminCourseFormDraft';
+
 export function AdminCourseFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -114,11 +116,41 @@ export function AdminCourseFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  // Load data from local storage or fetch if editing
   useEffect(() => {
-    if (id) {
-      loadCourse(id);
-    }
+    const loadInitialData = async () => {
+      if (id) {
+        // Editing existing course, load from DB
+        await loadCourse(id);
+        localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear draft if editing existing
+      } else {
+        // Adding new course, try to load from local storage
+        const savedDraft = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedDraft) {
+          try {
+            const draftData: CourseFormData = JSON.parse(savedDraft);
+            setCourseData(draftData);
+            setMessage('Loaded unsaved draft from previous session.');
+          } catch (e) {
+            console.error('Failed to parse saved draft:', e);
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+          }
+        }
+        setLoading(false);
+      }
+    };
+    loadInitialData();
   }, [id]);
+
+  // Save form data to local storage on changes (only for new course creation)
+  useEffect(() => {
+    if (!id) { // Only save draft for new courses
+      const timer = setTimeout(() => {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(courseData));
+      }, 1000); // Save every 1 second after last change
+      return () => clearTimeout(timer);
+    }
+  }, [courseData, id]);
 
   const loadCourse = async (courseId: string) => {
     setLoading(true);
@@ -432,6 +464,7 @@ export function AdminCourseFormPage() {
       }
 
       setMessage(`Course ${id ? 'updated' : 'created'} successfully!`);
+      localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear draft on successful save
       navigate('/admin/courses');
     } catch (err: any) {
       console.error('Error saving course:', err);
@@ -442,6 +475,7 @@ export function AdminCourseFormPage() {
   };
 
   const handleCancel = () => {
+    localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear draft on cancel
     navigate('/admin/courses');
   };
 

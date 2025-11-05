@@ -52,7 +52,7 @@ export function AdminPaymentsPage() {
 
       const { error: paymentError } = await supabase
         .from('payments')
-        .update(paymentUpdate) // Explicitly cast to PaymentsUpdate
+        .update(paymentUpdate)
         .eq('id', paymentId);
 
       if (paymentError) throw paymentError;
@@ -63,7 +63,7 @@ export function AdminPaymentsPage() {
         payment_id: paymentId,
       };
 
-      const { error: enrollmentError } = await supabase.from('enrollments').insert(enrollmentData); // Explicitly cast to EnrollmentsInsert
+      const { error: enrollmentError } = await supabase.from('enrollments').insert([enrollmentData]);
 
       if (enrollmentError) throw enrollmentError;
 
@@ -74,7 +74,7 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      await supabase.from('notifications').insert(notificationData); // Explicitly cast to NotificationsInsert
+      await supabase.from('notifications').insert([notificationData]);
 
       alert('Payment approved successfully!');
       loadPayments();
@@ -96,7 +96,7 @@ export function AdminPaymentsPage() {
 
       const { error } = await supabase
         .from('payments')
-        .update(paymentUpdate) // Explicitly cast to PaymentsUpdate
+        .update(paymentUpdate)
         .eq('id', paymentId);
 
       if (error) throw error;
@@ -108,7 +108,7 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      await supabase.from('notifications').insert(notificationData); // Explicitly cast to NotificationsInsert
+      await supabase.from('notifications').insert([notificationData]);
 
       alert('Payment rejected successfully!');
       loadPayments();

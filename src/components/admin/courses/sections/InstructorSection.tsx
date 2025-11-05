@@ -3,7 +3,7 @@ import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
 import { Textarea } from '../../../ui/textarea';
-import { Button } from '../../../ui/button';
+// Removed unused Button import
 import { Upload, XCircle } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
 // Removed unused InstructorRow
