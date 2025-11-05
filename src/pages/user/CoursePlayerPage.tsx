@@ -143,7 +143,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress').upsert([upsertData]);
+      await supabase.from('lesson_progress').upsert([upsertData] as LessonProgressInsert[]);
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete
@@ -236,7 +236,7 @@ export function CoursePlayerPage() {
             sections={course.sections}
             currentLesson={currentLesson}
             progress={progress}
-            onLessonSelect={setCurrentLesson}
+            onLessonSelect={(lesson: Lesson) => setCurrentLesson(lesson)}
           />
         </div>
       ) : (

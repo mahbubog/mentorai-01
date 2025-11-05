@@ -59,7 +59,7 @@ export function NotificationDropdown() {
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ is_read: true }) // Removed explicit cast as type is now inferred correctly
+        .update({ is_read: true } as NotificationsUpdate)
         .eq('id', id);
       
       if (error) throw error;

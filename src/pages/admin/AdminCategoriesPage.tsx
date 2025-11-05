@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, AlertCircle, CheckCircle, Loader2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, AlertCircle, CheckCircle, Loader2, Search, XCircle } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
@@ -40,11 +40,12 @@ export function AdminCategoriesPage() {
     }
   }, [newCategoryName, isNewSlugEditable]);
 
-  useEffect(() => {
-    if (editingCategory && !isEditedSlugEditable && editedCategoryName) {
-      setEditedCategorySlug(slugify(editedCategoryName));
-    }
-  }, [editedCategoryName, isEditedSlugEditable, editingCategory]);
+  // Removed the useEffect for editedCategorySlug to prevent potential re-render issues
+  // useEffect(() => {
+  //   if (editingCategory && !isEditedSlugEditable && editedCategoryName) {
+  //     setEditedCategorySlug(slugify(editedCategoryName));
+  //   }
+  // }, [editedCategoryName, isEditedSlugEditable, editingCategory]);
 
   const loadCategories = async () => {
     setLoading(true);
@@ -125,8 +126,9 @@ export function AdminCategoriesPage() {
 
   const handleEditClick = (category: CategoryWithCount) => {
     setEditingCategory(category);
-    setEditedCategoryName(category.name);
-    setEditedCategorySlug(category.slug);
+    setEditedCategoryName(category.name || ''); // Ensure string fallback
+    // Auto-slugify if not editable, otherwise use existing slug
+    setEditedCategorySlug(isEditedSlugEditable ? (category.slug || '') : slugify(category.name || '')); 
     setIsEditedSlugEditable(false);
     setError(null);
     setMessage(null);
