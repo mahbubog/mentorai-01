@@ -15,11 +15,10 @@ import {
   CourseSectionUpdate, 
   CourseLessonUpdate, 
   LessonResourceUpdate, 
-  CourseCategoriesMappingUpdate, 
-  CourseRequirementUpdate, 
-  CourseLearningOutcomeUpdate, 
-  InstructorsInsert, 
-  InstructorsUpdate 
+  InstructorsInsert,
+  CourseSectionRow, // Imported
+  CourseLessonRow, // Imported
+  LessonResourceRow // Imported
 } from '../../lib/database.types';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -186,15 +185,15 @@ export function AdminCourseFormPage() {
         price: Number((course as CourseLoadData).price),
         discount_price: (course as CourseLoadData).discount_price ? Number((course as CourseLoadData).discount_price) : null,
         category_ids: ((course as CourseLoadData).course_categories_mapping || []).map(c => c.category_id),
-        requirements: ((course as CourseLoadData).course_requirements || []).sort((a, b) => a.display_order - b.display_order),
-        learning_outcomes: ((course as CourseLoadData).course_learning_outcomes || []).sort((a, b) => a.display_order - b.display_order),
+        requirements: ((course as CourseLoadData).course_requirements || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0)),
+        learning_outcomes: ((course as CourseLoadData).course_learning_outcomes || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0)),
         sections: ((course as CourseLoadData).course_sections || [])
-          .sort((a, b) => a.display_order - b.display_order)
+          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
           .map(section => ({
             ...section,
             lessons: (section.course_lessons || [])
-              .sort((a, b) => a.display_order - b.display_order)
-              .map(lesson => ({
+              .sort((a: CourseLessonRow, b: CourseLessonRow) => (a.display_order || 0) - (b.display_order || 0))
+              .map((lesson: CourseLessonRow) => ({
                 ...lesson,
                 resources: lesson.lesson_resources || [],
               })),
@@ -251,7 +250,7 @@ export function AdminCourseFormPage() {
         };
         const { data: newInstructor, error: instructorError } = await supabase
           .from('instructors')
-          .insert(instructorPayload)
+          .insert([instructorPayload] as InstructorsInsert[])
           .select('id')
           .single();
 
@@ -309,7 +308,7 @@ export function AdminCourseFormPage() {
       } else {
         const { data: newCourse, error: insertError } = await supabase
           .from('courses')
-          .insert(coursePayload as CourseRow) // Cast to CourseRow for insert
+          .insert([coursePayload as CourseRow]) // Cast to CourseRow for insert
           .select('id')
           .single();
         if (insertError) throw insertError;
@@ -325,7 +324,7 @@ export function AdminCourseFormPage() {
           course_id: currentCourseId!,
           category_id: catId,
         }));
-        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings);
+        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings as CourseCategoriesMappingInsert[]);
         if (categoryError) throw categoryError;
       }
 
@@ -337,7 +336,7 @@ export function AdminCourseFormPage() {
           requirement: req.requirement,
           display_order: index,
         }));
-        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload);
+        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload as CourseRequirementInsert[]);
         if (reqError) throw reqError;
       }
 
@@ -349,7 +348,7 @@ export function AdminCourseFormPage() {
           outcome: out.outcome,
           display_order: index,
         }));
-        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload);
+        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload as CourseLearningOutcomeInsert[]);
         if (outError) throw outError;
       }
 
@@ -380,7 +379,7 @@ export function AdminCourseFormPage() {
           } else {
             const { data: newSection, error: insertError } = await supabase
               .from('course_sections')
-              .insert(sectionPayload as CourseSectionInsert) // Explicitly cast
+              .insert([sectionPayload as CourseSectionInsert]) // Explicitly cast
               .select('id')
               .single();
             if (insertError) throw insertError;
@@ -417,7 +416,7 @@ export function AdminCourseFormPage() {
             } else {
               const { data: newLesson, error: insertError } = await supabase
                 .from('course_lessons')
-                .insert(lessonPayload as CourseLessonInsert) // Explicitly cast
+                .insert([lessonPayload as CourseLessonInsert]) // Explicitly cast
                 .select('id')
                 .single();
               if (insertError) throw insertError;
@@ -455,7 +454,7 @@ export function AdminCourseFormPage() {
               } else {
                 const { error: insertError } = await supabase
                   .from('lesson_resources')
-                  .insert(resourcePayload as LessonResourceInsert); // Explicitly cast
+                  .insert([resourcePayload as LessonResourceInsert]); // Explicitly cast
                 if (insertError) throw insertError;
               }
             }
