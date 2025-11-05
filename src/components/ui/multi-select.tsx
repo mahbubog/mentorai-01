@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Check, ChevronDown } from 'lucide-react'; // Removed unused X
+import { Check, ChevronDown } from 'lucide-react';
 
 interface MultiSelectProps {
   options: { label: string; value: string }[];
@@ -49,7 +49,7 @@ export function MultiSelect({ options, selected, onSelect, placeholder = 'Select
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
+        <div className="absolute z-50 mt-1 w-full rounded-md border bg-white text-popover-foreground shadow-md">
           <div className="max-h-60 overflow-y-auto">
             {options.map((option) => (
               <div
