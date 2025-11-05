@@ -21,7 +21,8 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AdminPagesPage } from './pages/admin/AdminPagesPage';
 import { AdminContentPage } from './pages/admin/AdminContentPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
-import { AdminCourseFormPage } from './pages/admin/AdminCourseFormPage'; // New import
+import { AdminCourseFormPage } from './pages/admin/AdminCourseFormPage';
+import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage'; // New import
 import { PrivateRoute } from './components/PrivateRoute';
 import { AdminRoute } from './components/AdminRoute';
 
@@ -98,7 +99,7 @@ export default function App() {
             }
           />
           <Route
-            path="/admin/courses/new" // New route for adding a course
+            path="/admin/courses/new"
             element={
               <AdminRoute>
                 <AdminCourseFormPage />
@@ -106,7 +107,7 @@ export default function App() {
             }
           />
           <Route
-            path="/admin/courses/edit/:id" // New route for editing a course
+            path="/admin/courses/edit/:id"
             element={
               <AdminRoute>
                 <AdminCourseFormPage />
@@ -126,6 +127,14 @@ export default function App() {
             element={
               <AdminRoute>
                 <AdminUsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/categories" // New route for categories management
+            element={
+              <AdminRoute>
+                <AdminCategoriesPage />
               </AdminRoute>
             }
           />

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './Header';
-import { LayoutDashboard, BookOpen, CreditCard, Users, FileText, Settings, LogOut, FolderOpen } from 'lucide-react';
+import { LayoutDashboard, BookOpen, CreditCard, Users, FileText, Settings, LogOut, FolderOpen, ListTree } from 'lucide-react'; // Added ListTree icon
 import { useAuth } from '../contexts/AuthContext';
 
 interface AdminLayoutProps {
@@ -16,6 +16,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard Home' },
     { path: '/admin/courses', icon: BookOpen, label: 'Courses Management' },
+    { path: '/admin/categories', icon: ListTree, label: 'Categories Management' }, // New item
     { path: '/admin/users', icon: Users, label: 'Users Management' },
     { path: '/admin/payments', icon: CreditCard, label: 'Payments Management' },
     { path: '/admin/pages', icon: FileText, label: 'Pages Management' },
