@@ -3,7 +3,7 @@ import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
 import { MultiSelect } from '../../../ui/multi-select'; // Assuming a MultiSelect component
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../../lib/supabase'; // Corrected import path
 import { CourseRow } from '../../../../lib/database.types';
 
 interface CourseDetailsSectionProps {

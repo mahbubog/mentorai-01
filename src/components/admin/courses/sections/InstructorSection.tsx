@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../../../ui/textarea';
 import { Button } from '../../../ui/button';
 import { Plus, Upload, XCircle } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../../lib/supabase'; // Corrected import path
 import { InstructorRow } from '../../../../lib/database.types';
 
 interface InstructorSectionProps {
