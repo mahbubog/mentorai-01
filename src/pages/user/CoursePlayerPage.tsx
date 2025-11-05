@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import { CourseRow, LessonProgressInsert, LessonProgressRow } from '../../lib/database.types';
+import { CoursePlayerSidebar } from '../../components/course/CoursePlayerSidebar';
+import { LessonContent } from '../../components/course/LessonContent';
 
 interface Lesson {
   id: string;
   title: string;
+  description: string | null;
   duration: string | null;
   video_url: string;
 }
@@ -19,45 +21,79 @@ interface Section {
   course_lessons: Lesson[];
 }
 
+// Extended CourseRow type for the player page
+interface CoursePlayerCourse extends CourseRow {
+  sections: Section[];
+}
+
 export function CoursePlayerPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
-  const [course, setCourse] = useState<CourseRow | null>(null);
-  const [sections, setSections] = useState<Section[]>([]);
+  const navigate = useNavigate();
+  const [course, setCourse] = useState<CoursePlayerCourse | null>(null);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [progress, setProgress] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (courseId) {
-      loadCourse();
-    }
-  }, [courseId]);
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+    return `https://www.youtube.com/embed/${videoId}`;
+  };
 
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
+    if (!user || !courseId) return;
+
     try {
-      const { data: courseData } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', courseId!)
+      // 1. Check Enrollment Status
+      const { data: enrollmentData } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('course_id', courseId)
         .maybeSingle();
 
+      if (!enrollmentData) {
+        // User is not enrolled (or payment is pending/rejected)
+        navigate('/my-courses', { replace: true });
+        return;
+      }
+
+      // 2. Fetch Course Details
+      const { data: courseData, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .maybeSingle();
+
+      if (courseError) throw courseError;
+      
+      // Fix 7: Explicitly cast courseData to CourseRow to access properties
+      const typedCourseData = courseData as CourseRow | null;
+
+      if (!typedCourseData || typedCourseData.course_type !== 'recorded') {
+        // Only recorded courses use this player structure
+        navigate('/my-courses', { replace: true });
+        return;
+      }
+
+      // 3. Fetch Curriculum
       const { data: sectionsData } = await supabase
         .from('course_sections')
         .select(`
-          *,
-          course_lessons (*)
+          id,
+          title,
+          course_lessons (id, title, description, duration, video_url)
         `)
-        .eq('course_id', courseId!)
+        .eq('course_id', courseId)
         .order('display_order');
 
+      const sectionsArray = (sectionsData || []) as Section[];
+
+      // 4. Fetch Progress
       const { data: progressData } = await supabase
         .from('lesson_progress')
         .select('*')
-        .eq('user_id', user!.id);
-
-      setCourse(courseData);
-      setSections((sectionsData || []) as Section[]);
+        .eq('user_id', user.id);
 
       const progressMap: Record<string, boolean> = {};
       (progressData as LessonProgressRow[])?.forEach((p) => {
@@ -65,16 +101,40 @@ export function CoursePlayerPage() {
       });
       setProgress(progressMap);
 
-      const firstLesson = (sectionsData as Section[])?.[0]?.course_lessons?.[0];
-      if (firstLesson) {
-        setCurrentLesson(firstLesson);
+      // Fix 8: Spread typedCourseData
+      const fullCourse: CoursePlayerCourse = {
+        ...typedCourseData,
+        sections: sectionsArray,
+      };
+      setCourse(fullCourse);
+
+      // 5. Set initial lesson (first incomplete, or first overall)
+      let initialLesson: Lesson | null = null;
+      for (const section of sectionsArray) {
+        for (const lesson of section.course_lessons) {
+          if (!progressMap[lesson.id]) {
+            initialLesson = lesson;
+            break;
+          }
+        }
+        if (initialLesson) break;
       }
+
+      if (!initialLesson && sectionsArray.length > 0) {
+        initialLesson = sectionsArray[0].course_lessons[0];
+      }
+
+      setCurrentLesson(initialLesson);
     } catch (error) {
       console.error('Error loading course:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, courseId, navigate]);
+
+  useEffect(() => {
+    loadCourse();
+  }, [loadCourse]);
 
   const markLessonComplete = async (lessonId: string) => {
     try {
@@ -85,23 +145,44 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      // FIX 5: Remove array wrapper
-      const { error } = await supabase.from('lesson_progress' as const).upsert(upsertData);
+      // Fix 9: Remove array wrapper
+      await supabase.from('lesson_progress' as const).upsert(upsertData);
 
-      if (!error) {
-        setProgress({ ...progress, [lessonId]: true });
-      }
+      setProgress({ ...progress, [lessonId]: true });
+      
+      // Automatically move to the next lesson after marking complete
+      handleNextLesson();
     } catch (error) {
       console.error('Error marking lesson complete:', error);
     }
   };
 
-  const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
-    return `https://www.youtube.com/embed/${videoId}`;
+  const findNextLesson = (currentId: string): Lesson | null => {
+    let foundCurrent = false;
+    for (const section of course!.sections) {
+      for (const lesson of section.course_lessons) {
+        if (foundCurrent) {
+          return lesson;
+        }
+        if (lesson.id === currentId) {
+          foundCurrent = true;
+        }
+      }
+    }
+    return null;
   };
 
-  if (loading) {
+  const handleNextLesson = () => {
+    if (!currentLesson) return;
+    const nextLesson = findNextLesson(currentLesson.id);
+    if (nextLesson) {
+      setCurrentLesson(nextLesson);
+    }
+  };
+
+  const hasNextLesson = currentLesson ? !!findNextLesson(currentLesson.id) : false;
+
+  if (loading || !course) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -116,86 +197,48 @@ export function CoursePlayerPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="flex h-[calc(100vh-4rem)]">
-        <div className="flex-1 bg-black flex items-center justify-center">
-          {currentLesson ? (
-            <div className="w-full h-full">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
+        {/* Main Content Area (Video + Lesson Details) */}
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          {/* Video Player */}
+          <div className="flex-shrink-0 aspect-video bg-black">
+            {currentLesson ? (
               <iframe
                 src={getYouTubeEmbedUrl(currentLesson.video_url)}
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-            </div>
-          ) : (
-            <p className="text-white">Select a lesson to start learning</p>
-          )}
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-white">
+                <p>No lessons available for this course.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Lesson Content & Tabs */}
+          <div className="flex-1 bg-white">
+            {currentLesson && (
+              <LessonContent
+                lesson={currentLesson}
+                course={course}
+                isCompleted={progress[currentLesson.id] || false}
+                onMarkComplete={markLessonComplete}
+                onNextLesson={handleNextLesson}
+                hasNextLesson={hasNextLesson}
+              />
+            )}
+          </div>
         </div>
 
-        <aside className="w-96 bg-white overflow-y-auto">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-bold text-gray-900">{course?.title}</h2>
-          </div>
-
-          <div className="p-6">
-            {sections.map((section) => (
-              <div key={section.id} className="mb-6">
-                <h3 className="font-bold text-gray-900 mb-3">{section.title}</h3>
-                <div className="space-y-2">
-                  {section.course_lessons?.map((lesson: Lesson) => (
-                    <button
-                      key={lesson.id}
-                      onClick={() => setCurrentLesson(lesson)}
-                      className={`w-full text-left p-3 rounded-lg transition flex items-start ${
-                        currentLesson?.id === lesson.id
-                          ? 'bg-blue-50 border-2 border-blue-500'
-                          : 'hover:bg-gray-50 border-2 border-transparent'
-                      }`}
-                    >
-                      <div className="mr-3 mt-0.5">
-                        {progress[lesson.id] ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{lesson.title}</p>
-                        <p className="text-xs text-gray-500 mt-1">{lesson.duration}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {currentLesson && (
-            <div className="p-6 border-t sticky bottom-0 bg-white">
-              <button
-                onClick={() => markLessonComplete(currentLesson.id)}
-                disabled={progress[currentLesson.id]}
-                className={`w-full py-3 rounded-lg font-semibold transition flex items-center justify-center ${
-                  progress[currentLesson.id]
-                    ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {progress[currentLesson.id] ? (
-                  <>
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    Completed
-                  </>
-                ) : (
-                  <>
-                    Mark as Complete
-                    <ChevronRight className="h-5 w-5 ml-2" />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </aside>
+        {/* Sidebar (Curriculum) */}
+        <CoursePlayerSidebar
+          courseTitle={course.title}
+          sections={course.sections}
+          currentLesson={currentLesson}
+          progress={progress}
+          onLessonSelect={setCurrentLesson}
+        />
       </div>
     </div>
   );
