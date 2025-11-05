@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, CheckCircle, AlertCircle, MessageSquare, X, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationsInsert } from '../lib/database.types'; // Removed NotificationsUpdate as it's not directly used for the payload
+import { NotificationsInsert, NotificationsUpdate } from '../lib/database.types';
 
 interface NotificationRow extends NotificationsInsert {
   id: string;
