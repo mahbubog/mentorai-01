@@ -57,10 +57,10 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         timestamp_seconds: 0, // Placeholder for future video integration
       };
 
-      // Fix 18: Remove array wrapper
+      // Fix 11: Explicitly cast insert payload
       const { data, error } = await supabase
         .from('user_notes' as const)
-        .insert(noteData)
+        .insert(noteData as any)
         .select()
         .single();
 
@@ -98,10 +98,10 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         note_content: newContent,
       };
 
-      // Fix 19: Remove array wrapper
+      // FIX 7: Explicitly cast update payload
       await supabase
         .from('user_notes' as const)
-        .update(updatePayload)
+        .update(updatePayload as any)
         .eq('id', noteId);
       
       // Optimistically update state

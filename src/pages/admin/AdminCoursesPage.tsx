@@ -53,10 +53,10 @@ export function AdminCoursesPage() {
     };
 
     try {
-      // FIX 6: Remove array wrapper
+      // FIX 9: Explicitly cast update payload
       const { error } = await supabase
         .from('courses' as const)
-        .update(updatePayload)
+        .update(updatePayload as any)
         .eq('id', id);
 
       if (error) throw error;

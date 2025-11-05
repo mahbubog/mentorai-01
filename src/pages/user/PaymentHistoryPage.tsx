@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { UserLayout } from '../../components/UserLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { CheckCircle, XCircle, Clock, Eye, Calendar, Filter } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Eye, Filter } from 'lucide-react';
 import { PaymentRow } from '../../lib/database.types';
 import { PaymentReceiptModal } from '../../components/PaymentReceiptModal';
 import DatePicker from 'react-datepicker';

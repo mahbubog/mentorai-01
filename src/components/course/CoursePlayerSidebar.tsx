@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, CheckCircle, Circle, BookOpen } from 'lucide-re
 interface Lesson {
   id: string;
   title: string;
+  description: string | null; // Added description for consistency
   duration: string | null;
   video_url: string;
 }

@@ -50,10 +50,10 @@ export function AdminPaymentsPage() {
         approved_at: new Date().toISOString(),
       };
 
-      // FIX 7: Remove array wrapper
+      // FIX 10: Explicitly cast update payload
       const { error: paymentError } = await supabase
         .from('payments' as const)
-        .update(paymentUpdate)
+        .update(paymentUpdate as any)
         .eq('id', paymentId);
 
       if (paymentError) throw paymentError;
@@ -64,8 +64,8 @@ export function AdminPaymentsPage() {
         payment_id: paymentId,
       };
 
-      // FIX 8: Remove array wrapper
-      const { error: enrollmentError } = await supabase.from('enrollments' as const).insert(enrollmentData);
+      // FIX 19: Explicitly cast insert payload
+      const { error: enrollmentError } = await supabase.from('enrollments' as const).insert(enrollmentData as any);
 
       if (enrollmentError) throw enrollmentError;
 
@@ -76,8 +76,8 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      // FIX 9: Remove array wrapper
-      await supabase.from('notifications' as const).insert(notificationData);
+      // FIX 20: Explicitly cast insert payload
+      await supabase.from('notifications' as const).insert(notificationData as any);
 
       alert('Payment approved successfully!');
       loadPayments();
@@ -97,10 +97,10 @@ export function AdminPaymentsPage() {
         rejection_reason: reason,
       };
 
-      // FIX 10: Remove array wrapper
+      // FIX 11: Explicitly cast update payload
       const { error } = await supabase
         .from('payments' as const)
-        .update(paymentUpdate)
+        .update(paymentUpdate as any)
         .eq('id', paymentId);
 
       if (error) throw error;
@@ -112,8 +112,8 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      // FIX 11: Remove array wrapper
-      await supabase.from('notifications' as const).insert(notificationData);
+      // FIX 22: Explicitly cast insert payload
+      await supabase.from('notifications' as const).insert(notificationData as any);
 
       alert('Payment rejected successfully!');
       loadPayments();

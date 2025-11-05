@@ -1,4 +1,5 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { User, Lock, Bell, Trash2 } from 'lucide-react';
 import { UserLayout } from '../UserLayout';
 

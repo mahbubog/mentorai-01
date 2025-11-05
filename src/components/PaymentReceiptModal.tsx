@@ -1,4 +1,4 @@
-import { X, FileText, DollarSign, User, CreditCard, Download } from 'lucide-react';
+import { X, FileText, DollarSign, User, Download } from 'lucide-react';
 import { PaymentRow } from '../lib/database.types';
 
 interface PaymentReceiptModalProps {

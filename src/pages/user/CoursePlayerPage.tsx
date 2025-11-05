@@ -149,7 +149,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress' as const).upsert(upsertData);
+      await supabase.from('lesson_progress' as const).upsert(upsertData as any);
 
       setProgress({ ...progress, [lessonId]: true });
       

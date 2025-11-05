@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Mail, MessageSquare, Loader, CheckCircle } from 'lucide-react';
+import { Bell, Mail, Loader, CheckCircle } from 'lucide-react';
 
 export function NotificationPreferencesTab() {
   const [settings, setSettings] = useState({

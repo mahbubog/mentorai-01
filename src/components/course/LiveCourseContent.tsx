@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Calendar, Clock, Link, Users, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import { CourseRow } from '../../lib/database.types';
 import { LessonResources } from './LessonResources';
-import { supabase } from '../../lib/supabase';
 
 interface LiveCourseContentProps {
   course: CourseRow;
@@ -33,7 +32,6 @@ const calculateTimeLeft = (targetDate: Date) => {
 };
 
 export function LiveCourseContent({ course }: LiveCourseContentProps) {
-  const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [nextSession, setNextSession] = useState<LiveSession | null>(null);
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(new Date()));
   const [isLive, setIsLive] = useState(false);
@@ -51,7 +49,7 @@ export function LiveCourseContent({ course }: LiveCourseContentProps) {
         end_time: end,
         title: `${course.title} - Live Kickoff Session`,
       };
-      setSessions([mockSession]);
+      // Removed unused setSessions
       setNextSession(mockSession);
     }
   }, [course]);
