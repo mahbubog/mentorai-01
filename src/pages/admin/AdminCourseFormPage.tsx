@@ -159,7 +159,7 @@ export function AdminCourseFormPage() {
         .from('courses')
         .select(`
           *,
-          course_categories_mapping (category_id),
+          instructors (id, name, bio, photo),
           course_requirements (id, requirement, display_order),
           course_learning_outcomes (id, outcome, display_order),
           course_sections (

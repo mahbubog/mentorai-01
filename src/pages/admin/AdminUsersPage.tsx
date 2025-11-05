@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { Phone, Search, Download, Pencil, Ban, Trash2 } from 'lucide-react';
+import { Phone, Search, Download, Pencil, Ban, Trash2, Eye } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal'; // New component for editing
@@ -38,6 +38,7 @@ export function AdminUsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
+      // Fetch profiles, joining auth_users (for email/ban status) and enrollments count
       const { data, error } = await supabase
         .from('profiles')
         .select(`

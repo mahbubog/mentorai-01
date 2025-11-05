@@ -202,7 +202,7 @@ export function AdminCategoriesPage() {
     }
   };
 
-  const handleReorderCategory = async (categoryId: string, direction: 'up' | 'down') => {
+  const handleReorderCategory = useCallback(async (categoryId: string, direction: 'up' | 'down') => {
     setSaving(true);
     setError(null);
     setMessage(null);
@@ -228,14 +228,14 @@ export function AdminCategoriesPage() {
 
     try {
       // Update display_order for affected categories
-      const updates = updatedCategories.map((cat, idx) => ({
+      const updates: CourseCategoryUpdate[] = updatedCategories.map((cat, idx) => ({
         id: cat.id,
         display_order: idx,
       }));
 
       const { error: updateError } = await supabase
         .from('course_categories')
-        .upsert(updates as CourseCategoryUpdate[], { onConflict: 'id' });
+        .upsert(updates, { onConflict: 'id' });
 
       if (updateError) throw updateError;
 
@@ -247,7 +247,7 @@ export function AdminCategoriesPage() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [categories]);
 
   const filteredCategories = categories.filter(cat =>
     cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
