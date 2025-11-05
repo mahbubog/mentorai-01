@@ -10,7 +10,7 @@ import { RequirementsSection } from './sections/RequirementsSection';
 import { LearningOutcomesSection } from './sections/LearningOutcomesSection';
 import { SeoSection } from './sections/SeoSection';
 import { PublishingOptionsSection } from './sections/PublishingOptionsSection';
-import { Button } from '../../ui/button';
+// Removed unused Button import
 
 interface CourseFormProps {
   initialData: CourseFormData;
