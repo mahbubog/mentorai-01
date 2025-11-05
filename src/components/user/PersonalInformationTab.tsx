@@ -105,7 +105,7 @@ export function PersonalInformationTab() {
         profile_photo: photoUrl,
       };
 
-      // FIX 3: Explicitly cast update payload
+      // Explicitly cast update payload to any
       const { error: updateError } = await supabase
         .from('profiles' as const)
         .update(updatePayload as any)

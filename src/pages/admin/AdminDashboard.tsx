@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { Users, BookOpen, DollarSign, Clock, Activity, UserPlus, Plus, Eye, FileText, TrendingUp, PieChart as PieChartIcon, BarChart as BarChartIcon } from 'lucide-react';
-import { PaymentRow, ProfileRow, EnrollmentRow, CourseRow } from '../../lib/database.types';
+import { Users, BookOpen, DollarSign, Clock, Activity, UserPlus, Plus, Eye, FileText } from 'lucide-react'; // Removed unused imports
+import { PaymentRow, ProfileRow } from '../../lib/database.types'; // Removed unused EnrollmentRow, CourseRow, Database
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
@@ -332,9 +332,9 @@ export function AdminDashboard() {
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`} // Explicitly typed percent
                 >
-                  {mockEnrollmentsByCategoryData.map((entry, index) => (
+                  {mockEnrollmentsByCategoryData.map((_, index) => ( // Replaced entry with _
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

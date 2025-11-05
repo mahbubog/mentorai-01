@@ -59,7 +59,7 @@ export function NotificationDropdown() {
     try {
       await supabase
         .from('notifications' as const)
-        .update({ is_read: true } as any)
+        .update({ is_read: true } as any) // Explicitly cast payload to any
         .eq('id', id);
       
       setNotifications(prev => 
