@@ -53,7 +53,7 @@ export function AdminCoursesPage() {
     };
 
     try {
-      // FIX 9: Explicitly cast update payload
+      // FIX 5: Explicitly cast update payload
       const { error } = await supabase
         .from('courses' as const)
         .update(updatePayload as any)

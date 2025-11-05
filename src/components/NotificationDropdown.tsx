@@ -57,9 +57,9 @@ export function NotificationDropdown() {
 
   const markAsRead = async (id: string) => {
     try {
-      // FIX 4: Explicitly cast update payload
+      // FIX 1: Use 'notifications' as const for table name
       await supabase
-        .from('notifications' as keyof Database['public']['Tables'])
+        .from('notifications' as const)
         .update({ is_read: true } as any)
         .eq('id', id);
       

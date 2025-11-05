@@ -98,7 +98,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         note_content: newContent,
       };
 
-      // FIX 7: Explicitly cast update payload
+      // FIX 4: Explicitly cast update payload
       await supabase
         .from('user_notes' as const)
         .update(updatePayload as any)

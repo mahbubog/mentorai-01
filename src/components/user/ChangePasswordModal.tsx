@@ -8,7 +8,7 @@ interface ChangePasswordModalProps {
 }
 
 export function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
-  const { user } = useAuth();
+  const { user: _user } = useAuth(); // Renamed to _user to suppress warning
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);

@@ -50,7 +50,7 @@ export function AdminPaymentsPage() {
         approved_at: new Date().toISOString(),
       };
 
-      // FIX 10: Explicitly cast update payload
+      // FIX 6: Explicitly cast update payload
       const { error: paymentError } = await supabase
         .from('payments' as const)
         .update(paymentUpdate as any)
@@ -97,7 +97,7 @@ export function AdminPaymentsPage() {
         rejection_reason: reason,
       };
 
-      // FIX 11: Explicitly cast update payload
+      // FIX 7: Explicitly cast update payload
       const { error } = await supabase
         .from('payments' as const)
         .update(paymentUpdate as any)
