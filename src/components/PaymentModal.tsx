@@ -119,7 +119,7 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
 
     try {
       if (paymentScreenshot) {
-        screenshotUrl = await uploadScreenshot(paymentScreenshot);
+        screenshotUrl = await uploadPhoto(paymentScreenshot);
       }
 
       const paymentData: PaymentsInsert = {
@@ -140,7 +140,7 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData as PaymentsInsert]);
 
       if (paymentError) throw paymentError;
 

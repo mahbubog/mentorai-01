@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Phone, Search, Download, Pencil, Ban, Trash2, Eye } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal'; // New component for editing
+import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal';
 
 interface UserProfile {
   id: string;
@@ -239,10 +239,10 @@ export function AdminUsersPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User
+                      User (ID / Name / Email)
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contact
+                      Phone
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Registered
@@ -295,6 +295,13 @@ export function AdminUsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => setSelectedUserToEdit(user)}
+                              className="text-gray-600 hover:text-gray-700"
+                              title="View Details"
+                            >
+                              <Eye className="h-5 w-5" />
+                            </button>
                             <button
                               onClick={() => setSelectedUserToEdit(user)}
                               className="text-blue-600 hover:text-blue-700"

@@ -113,7 +113,7 @@ export function AdminCategoriesPage() {
 
       const { error: insertError } = await supabase
         .from('course_categories')
-        .insert([categoryData]);
+        .insert([categoryData as CourseCategoryInsert]);
 
       if (insertError) throw insertError;
 
@@ -160,7 +160,7 @@ export function AdminCategoriesPage() {
 
       const { error: updateError } = await supabase
         .from('course_categories')
-        .update(updateData)
+        .update(updateData as CourseCategoryUpdate)
         .eq('id', editingCategory.id);
 
       if (updateError) throw updateError;
@@ -235,7 +235,7 @@ export function AdminCategoriesPage() {
 
       const { error: updateError } = await supabase
         .from('course_categories')
-        .upsert(updates, { onConflict: 'id' });
+        .upsert(updates as CourseCategoryUpdate[], { onConflict: 'id' });
 
       if (updateError) throw updateError;
 
@@ -372,7 +372,6 @@ export function AdminCategoriesPage() {
                         <Button
                           type="button"
                           variant="outline"
-                          size="sm"
                           onClick={() => setIsEditedSlugEditable(!isEditedSlugEditable)}
                           disabled={saving}
                         >

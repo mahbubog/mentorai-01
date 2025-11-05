@@ -252,12 +252,12 @@ export function AdminCourseFormPage() {
         };
         const { data: newInstructor, error: instructorError } = await supabase
           .from('instructors')
-          .insert([instructorPayload])
+          .insert([instructorPayload as InstructorsInsert])
           .select('id')
           .single();
 
         if (instructorError) throw instructorError;
-        instructorId = newInstructor.id;
+        instructorId = (newInstructor as { id: string }).id;
       }
 
       // 2. Upload thumbnail and preview video if new files are provided
@@ -314,7 +314,7 @@ export function AdminCourseFormPage() {
           .select('id')
           .single();
         if (insertError) throw insertError;
-        currentCourseId = newCourse.id;
+        currentCourseId = (newCourse as { id: string }).id;
       }
 
       if (!currentCourseId) throw new Error('Course ID not available after save.');
@@ -326,7 +326,7 @@ export function AdminCourseFormPage() {
           course_id: currentCourseId!,
           category_id: catId,
         }));
-        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings);
+        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings as CourseCategoriesMappingInsert[]);
         if (categoryError) throw categoryError;
       }
 
@@ -338,7 +338,7 @@ export function AdminCourseFormPage() {
           requirement: req.requirement,
           display_order: index,
         }));
-        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload);
+        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload as CourseRequirementInsert[]);
         if (reqError) throw reqError;
       }
 
@@ -350,14 +350,14 @@ export function AdminCourseFormPage() {
           outcome: out.outcome,
           display_order: index,
         }));
-        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload);
+        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload as CourseLearningOutcomeInsert[]);
         if (outError) throw outError;
       }
 
       // 7. Handle Curriculum (Sections, Lessons, Resources)
       if (formData.course_type === 'recorded') {
         // Delete old sections/lessons/resources not present in new data
-        const existingSections = (await supabase.from('course_sections').select('id').eq('course_id', currentCourseId)).data?.map(s => s.id) || [];
+        const existingSections = (await supabase.from('course_sections').select('id').eq('course_id', currentCourseId)).data?.map(s => (s as { id: string }).id) || [];
         const sectionsToDelete = existingSections.filter(id => !formData.sections.some(s => s.id === id));
         if (sectionsToDelete.length > 0) {
           await supabase.from('course_sections').delete().in('id', sectionsToDelete);
@@ -385,13 +385,13 @@ export function AdminCourseFormPage() {
               .select('id')
               .single();
             if (insertError) throw insertError;
-            currentSectionId = newSection.id;
+            currentSectionId = (newSection as { id: string }).id;
           }
 
           if (!currentSectionId) throw new Error('Section ID not available after save.');
 
           // Delete old lessons/resources not present in new data
-          const existingLessons = (await supabase.from('course_lessons').select('id').eq('section_id', currentSectionId)).data?.map(l => l.id) || [];
+          const existingLessons = (await supabase.from('course_lessons').select('id').eq('section_id', currentSectionId)).data?.map(l => (l as { id: string }).id) || [];
           const lessonsToDelete = existingLessons.filter(id => !section.lessons.some(l => l.id === id));
           if (lessonsToDelete.length > 0) {
             await supabase.from('course_lessons').delete().in('id', lessonsToDelete);
@@ -422,13 +422,13 @@ export function AdminCourseFormPage() {
                 .select('id')
                 .single();
               if (insertError) throw insertError;
-              currentLessonId = newLesson.id;
+              currentLessonId = (newLesson as { id: string }).id;
             }
 
             if (!currentLessonId) throw new Error('Lesson ID not available after save.');
 
             // Delete old resources not present in new data
-            const existingResources = (await supabase.from('lesson_resources').select('id').eq('lesson_id', currentLessonId)).data?.map(r => r.id) || [];
+            const existingResources = (await supabase.from('lesson_resources').select('id').eq('lesson_id', currentLessonId)).data?.map(r => (r as { id: string }).id) || [];
             const resourcesToDelete = existingResources.filter(id => !lesson.resources.some(r => r.id === id));
             if (resourcesToDelete.length > 0) {
               await supabase.from('lesson_resources').delete().in('id', resourcesToDelete);
