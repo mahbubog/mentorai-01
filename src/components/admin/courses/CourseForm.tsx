@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CourseFormData, SectionFormData } from '../../../pages/admin/AdminCourseFormPage'; // Removed unused LessonFormData
+import { CourseFormData, LessonFormData, SectionFormData } from '../../../pages/admin/AdminCourseFormPage';
 import { BasicInfoSection } from './sections/BasicInfoSection';
 import { CourseDetailsSection } from './sections/CourseDetailsSection';
 import { LiveCourseDetailsSection } from './sections/LiveCourseDetailsSection';
@@ -27,7 +27,7 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
     setFormData(initialData);
   }, [initialData]);
 
-  const handleFieldChange = useCallback((field: string, value: any) => {
+  const handleFieldChange = useCallback((field: keyof CourseFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
@@ -91,7 +91,6 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
         instructor_id={formData.instructor_id}
         instructor_name={formData.instructor_name}
         instructor_bio={formData.instructor_bio}
-        instructor_credentials={formData.instructor_credentials}
         onFieldChange={handleFieldChange}
       />
 

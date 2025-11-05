@@ -3,13 +3,13 @@ import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
 import { Checkbox } from '../../../ui/checkbox';
 import { Button } from '../../../ui/button';
-import { Loader2 } from 'lucide-react'; // Removed unused Eye
+import { Loader2, Eye } from 'lucide-react';
 import { CourseRow } from '../../../../lib/database.types';
 
 interface PublishingOptionsSectionProps {
   status: CourseRow['status'];
   is_featured: boolean;
-  onFieldChange: (field: string, value: any) => void; // Changed to string for flexibility with keyof any
+  onFieldChange: (field: keyof any, value: any) => void;
   onSave: () => void;
   onPublish: () => void;
   onCancel: () => void;

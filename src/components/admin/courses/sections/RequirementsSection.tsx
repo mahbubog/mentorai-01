@@ -1,5 +1,6 @@
 import { ChangeEvent, useCallback } from 'react';
 import { Input } from '../../../ui/input';
+import { Label } from '../../../ui/label';
 import { Button } from '../../../ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 

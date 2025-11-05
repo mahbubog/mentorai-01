@@ -6,7 +6,7 @@ import { Users, BookOpen, DollarSign, Clock, Activity, UserPlus, Plus, Eye, File
 import { PaymentRow, ProfileRow } from '../../lib/database.types';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, PieLabelRenderProps
+  PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
 
 // Mock data for charts (replace with actual data fetching/aggregation later)
@@ -331,7 +331,8 @@ export function AdminDashboard() {
                   labelLine={false}
                   outerRadius={100}
                   fill="#8884d8"
-                  label={({ name, percent }: PieLabelRenderProps) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} // Explicitly typed percent
+                  dataKey="value"
+                  label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`} // Explicitly typed percent
                 >
                   {mockEnrollmentsByCategoryData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

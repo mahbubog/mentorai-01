@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { Pencil, Trash2, Eye, Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-react';
-import { CoursesUpdate, CourseRow, CourseCategoryRow } from '../../lib/database.types';
+import { CoursesUpdate, CourseRow, CourseCategoryRow } from '../../lib/database.types'; // Removed unused Database
 
 // Extend CourseRow to include instructor name and categories
 interface CourseWithDetails extends CourseRow {
@@ -162,7 +162,7 @@ export function AdminCoursesPage() {
     try {
       const { error } = await supabase
         .from('courses')
-        .update(updatePayload as CoursesUpdate) // Use specific Update type
+        .update(updatePayload) // Use specific Update type
         .eq('id', id);
 
       if (error) throw error;
