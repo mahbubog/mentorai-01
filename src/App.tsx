@@ -18,11 +18,12 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminCoursesPage } from './pages/admin/AdminCoursesPage';
 import { AdminPaymentsPage } from './pages/admin/AdminPaymentsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
+import { AdminUserDetailsPage } from './pages/admin/AdminUserDetailsPage'; // New import
 import { AdminPagesPage } from './pages/admin/AdminPagesPage';
 import { AdminContentPage } from './pages/admin/AdminContentPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminCourseFormPage } from './pages/admin/AdminCourseFormPage';
-import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage'; // New import
+import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage';
 import { PrivateRoute } from './components/PrivateRoute';
 import { AdminRoute } from './components/AdminRoute';
 
@@ -131,7 +132,15 @@ export default function App() {
             }
           />
           <Route
-            path="/admin/categories" // New route for categories management
+            path="/admin/users/:userId" // New route for user details
+            element={
+              <AdminRoute>
+                <AdminUserDetailsPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/categories"
             element={
               <AdminRoute>
                 <AdminCategoriesPage />

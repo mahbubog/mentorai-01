@@ -5,6 +5,7 @@ import { Phone, Search, Download, Pencil, Ban, Trash2, Eye } from 'lucide-react'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { EditUserProfileModal } from '../../components/admin/users/EditUserProfileModal';
+import { Link } from 'react-router-dom'; // Import Link
 
 interface UserProfile {
   id: string;
@@ -295,13 +296,9 @@ export function AdminUsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
-                            <button
-                              onClick={() => setSelectedUserToEdit(user)}
-                              className="text-gray-600 hover:text-gray-700"
-                              title="View Details"
-                            >
+                            <Link to={`/admin/users/${user.id}`} className="text-gray-600 hover:text-gray-700" title="View Details">
                               <Eye className="h-5 w-5" />
-                            </button>
+                            </Link>
                             <button
                               onClick={() => setSelectedUserToEdit(user)}
                               className="text-blue-600 hover:text-blue-700"
