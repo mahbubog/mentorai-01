@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './Header';
 import { LayoutDashboard, BookOpen, CreditCard, Users, FileText, Settings, LogOut, FolderOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { AdminTopBarStats } from './admin/AdminTopBarStats'; // New import
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -68,7 +69,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               </nav>
             </div>
           </aside>
-          <main className="flex-1">{children}</main>
+          <main className="flex-1">
+            {/* Admin Top Bar Stats */}
+            <AdminTopBarStats />
+            {children}
+          </main>
         </div>
       </div>
     </div>
