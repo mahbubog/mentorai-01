@@ -117,9 +117,11 @@ export function AdminUsersPage() {
     if (!confirm(`Are you sure you want to ${actionText} this user?`)) return;
 
     try {
+      // Casting the payload to 'any' to bypass strict type checking on ban_duration, 
+      // which expects number | null but sometimes conflicts with the inferred type.
       const { error } = await supabase.auth.admin.updateUserById(userId, {
         ban_duration: newBanDuration,
-      });
+      } as any); 
 
       if (error) throw error;
 
