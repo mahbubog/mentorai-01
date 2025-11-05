@@ -2,19 +2,19 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
-import { MultiSelect } from '../../../ui/multi-select'; // Assuming a MultiSelect component
-import { supabase } from '../../../../lib/supabase'; // Corrected import path
-import { CourseRow } from '../../../../lib/database.types';
+import { MultiSelect } from '../../../ui/multi-select'; // Corrected import syntax
+import { supabase } from '../../../../lib/supabase';
+import { CourseRow } from '../../../../lib/database.types'; // Removed unused CourseCategoryRow
 
 interface CourseDetailsSectionProps {
   course_type: CourseRow['course_type'];
   category_ids: string[];
   difficulty_level: CourseRow['difficulty_level'];
-  language: string;
+  language: string | null; // Allow null
   price: number;
   discount_price: number | null;
   duration: string | null;
-  onFieldChange: (field: keyof any, value: any) => void;
+  onFieldChange: (field: string, value: any) => void; // Changed to string for flexibility with keyof any
 }
 
 interface Category {
@@ -132,7 +132,7 @@ export function CourseDetailsSection({
         <Label htmlFor="language">Language</Label>
         <Input
           id="language"
-          value={language}
+          value={language || ''}
           onChange={handleLanguageChange}
           placeholder="e.g., English"
         />

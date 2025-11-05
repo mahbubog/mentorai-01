@@ -8,7 +8,7 @@ interface CourseIncludesSectionProps {
   includes_resources: boolean;
   includes_mobile_access: boolean;
   includes_qa_support: boolean;
-  onFieldChange: (field: keyof any, value: any) => void;
+  onFieldChange: (field: string, value: any) => void; // Changed to string for flexibility with keyof any
 }
 
 export function CourseIncludesSection({
@@ -20,7 +20,7 @@ export function CourseIncludesSection({
   onFieldChange,
 }: CourseIncludesSectionProps) {
   const handleCheckboxChange = useCallback((field: keyof CourseIncludesSectionProps, checked: boolean) => {
-    onFieldChange(field, checked);
+    onFieldChange(field as string, checked); // Cast field to string
   }, [onFieldChange]);
 
   return (

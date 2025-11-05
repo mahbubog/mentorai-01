@@ -4,9 +4,9 @@ import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
 
 interface SeoSectionProps {
-  meta_title: string;
-  meta_description: string;
-  onFieldChange: (field: keyof any, value: any) => void;
+  meta_title: string | null; // Allow null
+  meta_description: string | null; // Allow null
+  onFieldChange: (field: string, value: any) => void; // Changed to string for flexibility with keyof any
 }
 
 export function SeoSection({
@@ -30,13 +30,13 @@ export function SeoSection({
         <Label htmlFor="meta_title">Meta Title</Label>
         <Input
           id="meta_title"
-          value={meta_title}
+          value={meta_title || ''}
           onChange={handleMetaTitleChange}
           placeholder="SEO friendly title (max 60 characters)"
           maxLength={60}
         />
         <p className="text-sm text-gray-500 mt-1">
-          {meta_title.length} / 60 characters
+          {(meta_title?.length || 0)} / 60 characters
         </p>
       </div>
 
@@ -44,14 +44,14 @@ export function SeoSection({
         <Label htmlFor="meta_description">Meta Description</Label>
         <Textarea
           id="meta_description"
-          value={meta_description}
+          value={meta_description || ''}
           onChange={handleMetaDescriptionChange}
           placeholder="SEO friendly description (max 160 characters)"
           maxLength={160}
           rows={3}
         />
         <p className="text-sm text-gray-500 mt-1">
-          {meta_description.length} / 160 characters
+          {(meta_description?.length || 0)} / 160 characters
         </p>
       </div>
     </div>

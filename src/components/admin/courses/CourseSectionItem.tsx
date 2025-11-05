@@ -76,7 +76,7 @@ export function CourseSectionItem({ section, onSectionChange }: CourseSectionIte
         <Label htmlFor={`section-description-${section.id}`}>Section Description</Label>
         <Textarea
           id={`section-description-${section.id}`}
-          value={section.description}
+          value={section.description || ''}
           onChange={handleDescriptionChange}
           placeholder="Briefly describe this section"
           rows={3}
