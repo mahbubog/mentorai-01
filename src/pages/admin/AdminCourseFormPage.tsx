@@ -252,7 +252,7 @@ export function AdminCourseFormPage() {
         };
         const { data: newInstructor, error: instructorError } = await supabase
           .from('instructors')
-          .insert([instructorPayload as InstructorsInsert])
+          .insert([instructorPayload])
           .select('id')
           .single();
 
@@ -326,7 +326,7 @@ export function AdminCourseFormPage() {
           course_id: currentCourseId!,
           category_id: catId,
         }));
-        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings as CourseCategoriesMappingInsert[]);
+        const { error: categoryError } = await supabase.from('course_categories_mapping').insert(categoryMappings);
         if (categoryError) throw categoryError;
       }
 
@@ -338,7 +338,7 @@ export function AdminCourseFormPage() {
           requirement: req.requirement,
           display_order: index,
         }));
-        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload as CourseRequirementInsert[]);
+        const { error: reqError } = await supabase.from('course_requirements').insert(requirementsPayload);
         if (reqError) throw reqError;
       }
 
@@ -350,7 +350,7 @@ export function AdminCourseFormPage() {
           outcome: out.outcome,
           display_order: index,
         }));
-        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload as CourseLearningOutcomeInsert[]);
+        const { error: outError } = await supabase.from('course_learning_outcomes').insert(outcomesPayload);
         if (outError) throw outError;
       }
 

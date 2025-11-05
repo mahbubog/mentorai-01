@@ -84,7 +84,8 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
     }
   };
 
-  const uploadScreenshot = async (file: File): Promise<string> => {
+  // Renamed from uploadScreenshot to uploadPhoto to match usage (Error 2 & 3 fix)
+  const uploadPhoto = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${user!.id}/${course.id}/${Date.now()}.${fileExt}`;
     const filePath = `payment_screenshots/${fileName}`;
@@ -140,7 +141,8 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      const { error: paymentError } = await supabase.from('payments').insert([paymentData as PaymentsInsert]);
+      // Removed redundant cast (Error 4 fix)
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
 
       if (paymentError) throw paymentError;
 

@@ -38,7 +38,8 @@ export function AdminUsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // Fetch profiles, joining auth_users (for email/ban status) and enrollments count
+      // Fetch profiles, joining auth_users (for email/ban status) and enrollments count.
+      // Since we start from 'profiles', we get all users who successfully registered and created a profile entry.
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -97,7 +98,10 @@ export function AdminUsersPage() {
       tempUsers = tempUsers.filter((user) => new Date(user.created_at) >= startDate);
     }
     if (endDate) {
-      tempUsers = tempUsers.filter((user) => new Date(user.created_at) <= endDate);
+      // Filter up to the end of the selected day
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      tempUsers = tempUsers.filter((user) => new Date(user.created_at) <= endOfDay);
     }
 
     setFilteredUsers(tempUsers);
@@ -111,15 +115,12 @@ export function AdminUsersPage() {
   };
 
   const handleBlockUnblock = async (userId: string, currentStatus: 'Active' | 'Blocked') => {
-    // Supabase expects ban_duration in seconds (number) or null to unban.
     const newBanDuration: number | null = currentStatus === 'Active' ? 60 * 60 * 24 * 365 * 10 : null; // Block for 10 years
     const actionText = currentStatus === 'Active' ? 'block' : 'unblock';
 
     if (!confirm(`Are you sure you want to ${actionText} this user?`)) return;
 
     try {
-      // Casting the payload to 'any' to bypass strict type checking on ban_duration, 
-      // which expects number | null but sometimes conflicts with the inferred type.
       const { error } = await supabase.auth.admin.updateUserById(userId, {
         ban_duration: newBanDuration,
       } as any); 
@@ -138,8 +139,7 @@ export function AdminUsersPage() {
     if (!confirm(`Are you sure you want to permanently delete user "${userName || userId}"? This action cannot be undone.`)) return;
 
     try {
-      // Client-side deletion of auth.users is not directly supported without a service role key.
-      // We delete the profile data, which should cascade to related tables (enrollments, notes, etc.)
+      // Delete the profile data, which should cascade to related tables (enrollments, notes, etc.)
       const { error: profileDeleteError } = await supabase
         .from('profiles')
         .delete()

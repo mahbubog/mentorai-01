@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 import { CourseRow, LessonProgressInsert, LessonProgressRow, CourseLessonRow, CourseSectionRow } from '../../lib/database.types';
 import { CoursePlayerSidebar } from '../../components/course/CoursePlayerSidebar';
 import { LessonContent } from '../../components/course/LessonContent';
@@ -165,7 +166,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress').upsert([upsertData as LessonProgressInsert]);
+      await supabase.from('lesson_progress').upsert([upsertData]);
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete
