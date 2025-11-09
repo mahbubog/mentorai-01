@@ -59,7 +59,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
 
       const { data, error } = await supabase
         .from('user_notes')
-        .insert([noteData] as any) // Fix Error 8 (User's Fix Error 5)
+        .insert([noteData] as any) // Fix Error 5
         .select()
         .single();
 
@@ -98,8 +98,8 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       };
 
       await supabase
-        .from('user_notes')
-        .update(updatePayload as any) // Fix Error 9 (User's Fix Error 6)
+        .from('user_notes' as any) // FIX 3
+        .update(updatePayload)
         .eq('id', noteId);
       
       // Optimistically update state

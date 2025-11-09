@@ -60,8 +60,8 @@ export function NotificationDropdown() {
       const updatePayload: NotificationsUpdate = { is_read: true };
       
       const { error } = await supabase
-        .from('notifications')
-        .update(updatePayload as any) // Fix Error 6 (User's Fix Error 3)
+        .from('notifications' as any) // FIX 1
+        .update(updatePayload)
         .eq('id', id);
       
       if (error) throw error;

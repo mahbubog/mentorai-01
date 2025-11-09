@@ -17,11 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,8 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         full_name: fullName,
         phone: phone,
       };
-      // Fix Error 4: Cast payload to any to resolve Postgrest type mismatch
-      const { error: profileError } = await supabase.from('profiles').insert([profileData] as any); 
+      const { error: profileError } = await supabase.from('profiles').insert([profileData] as any);
 
       if (profileError) throw profileError;
     }
