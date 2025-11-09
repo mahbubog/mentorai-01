@@ -26,7 +26,7 @@ export function AdminPaymentsPage() {
   const [loading, setLoading] = useState(true);
   
   // Filters
-  const [filterStatus, setFilterStatus] = useState('pending');
+  const [filterStatus, setFilterStatus] = useState('pending'); // Initial filter is 'pending'
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMethod, setFilterMethod] = useState('all');
   const [filterCourseId, setFilterCourseId] = useState('all');
@@ -52,7 +52,11 @@ export function AdminPaymentsPage() {
         `)
         .order('created_at', { ascending: false });
 
-      if (paymentsError) throw paymentsError;
+      if (paymentsError) {
+        console.error('Supabase Error loading payments:', paymentsError);
+        throw paymentsError;
+      }
+      console.log('DEBUG: Fetched paymentsData:', paymentsData); // Added debug log
       setAllPayments(paymentsData as PaymentWithDetails[] || []);
 
       // 2. Load course options for filtering
@@ -61,11 +65,15 @@ export function AdminPaymentsPage() {
         .select('id, title')
         .eq('status', 'published');
       
-      if (coursesError) throw coursesError;
+      if (coursesError) {
+        console.error('Supabase Error loading courses:', coursesError);
+        throw coursesError;
+      }
       setCourseOptions(coursesData || []);
 
-    } catch (error) {
-      console.error('Error loading data:', error);
+    } catch (error: any) {
+      console.error('Error in loadPaymentsAndCourses:', error);
+      // Optionally, set an error state to display in the UI
     } finally {
       setLoading(false);
     }
@@ -73,11 +81,14 @@ export function AdminPaymentsPage() {
 
   const filteredPayments = useMemo(() => {
     let tempPayments = allPayments;
+    console.log('DEBUG: useMemo - allPayments before filter:', tempPayments); // Added debug log
+    console.log('DEBUG: useMemo - current filterStatus:', filterStatus); // Added debug log
 
     // Status Filter
     if (filterStatus !== 'all') {
       tempPayments = tempPayments.filter(p => p.status === filterStatus);
     }
+    console.log('DEBUG: useMemo - tempPayments after status filter:', tempPayments); // Added debug log
 
     // Course Filter
     if (filterCourseId !== 'all') {
@@ -109,7 +120,7 @@ export function AdminPaymentsPage() {
       endOfDay.setHours(23, 59, 59, 999);
       tempPayments = tempPayments.filter(p => new Date(p.created_at) <= endOfDay);
     }
-
+    console.log('DEBUG: useMemo - final filteredPayments:', tempPayments); // Added debug log
     return tempPayments;
   }, [allPayments, filterStatus, filterCourseId, filterMethod, searchTerm, startDate, endDate]);
 
