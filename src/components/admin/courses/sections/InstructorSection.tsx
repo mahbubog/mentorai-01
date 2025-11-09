@@ -5,16 +5,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../../../ui/textarea';
 // Removed unused Button import
 import { Upload, XCircle } from 'lucide-react';
-import { supabase } from '../../../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../../../lib/supabase';
 import { CourseRow } from '../../../../lib/database.types'; // Added CourseRow import
-import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Import CourseFormData
 
 interface InstructorSectionProps {
   instructor_id: string | null;
   instructor_name?: string | null; // Allow null
   instructor_bio?: string | null;
   instructor_credentials?: string | null;
-  onFieldChange: (field: keyof CourseFormData, value: any) => void; // Changed field type to keyof CourseFormData
+  onFieldChange: (field: keyof CourseRow | 'instructor_name' | 'instructor_bio' | 'instructor_photo' | 'instructor_credentials', value: any) => void;
 }
 
 interface InstructorOption {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { UserLayout } from '../../components/UserLayout';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { CheckCircle, XCircle, Clock, Eye, Filter } from 'lucide-react';
 import { PaymentRow } from '../../lib/database.types';

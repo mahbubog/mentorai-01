@@ -2,7 +2,6 @@ import { ChangeEvent, useCallback } from 'react';
 import { Input } from '../../../ui/input';
 import { Button } from '../../../ui/button';
 import { Plus, Trash2 } from 'lucide-react';
-import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Import CourseFormData
 
 interface RequirementsSectionProps {
   requirements: { id?: string; requirement: string; display_order: number | null }[];

@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { GraduationCap, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../integrations/supabase/client'; // Updated import path
 
 export function Header() {
   const { user, isAdmin, signOut } = useAuth();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Trash2, AlertTriangle, Loader } from 'lucide-react';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 

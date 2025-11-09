@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { supabaseAdmin } from '../../lib/supabaseAdmin'; // Import the admin client
 import { Phone, Search, Download, Pencil, Ban, Trash2, Eye } from 'lucide-react';
 import DatePicker from 'react-datepicker';

@@ -5,12 +5,11 @@ import { Checkbox } from '../../../ui/checkbox';
 import { Button } from '../../../ui/button';
 import { Loader2 } from 'lucide-react'; // Removed unused Eye
 import { CourseRow } from '../../../../lib/database.types';
-import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Import CourseFormData
 
 interface PublishingOptionsSectionProps {
   status: CourseRow['status'];
   is_featured: boolean;
-  onFieldChange: (field: keyof CourseFormData, value: any) => void; // Changed field type to keyof CourseFormData
+  onFieldChange: (field: keyof CourseRow, value: any) => void;
   onSave: () => void;
   onPublish: () => void;
   onCancel: () => void;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { supabaseAdmin } from '../../lib/supabaseAdmin'; // Import the admin client
 import { Mail, Phone, Calendar, BookOpen, DollarSign, Clock, Ban, Trash2, Send, Loader2, Pencil } from 'lucide-react';
 import { ProfileRow, EnrollmentRow, PaymentRow, CourseRow } from '../../lib/database.types';

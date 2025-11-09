@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
 import { CourseForm } from '../../components/admin/courses/CourseForm';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { 
   CourseRow, 
   CoursesInsert, 
@@ -311,7 +311,7 @@ export function AdminCourseFormPage() {
       } else {
         const { data: newCourse, error: insertError } = await supabase
           .from('courses')
-          .insert([coursePayload] as CoursesInsert[])
+          .insert([coursePayload as CoursesInsert] as CoursesInsert[])
           .select('id')
           .single();
         if (insertError) throw insertError;
@@ -382,7 +382,7 @@ export function AdminCourseFormPage() {
           } else {
             const { data: newSection, error: insertError } = await supabase
               .from('course_sections')
-              .insert([sectionPayload] as CourseSectionInsert[])
+              .insert([sectionPayload as CourseSectionInsert] as CourseSectionInsert[])
               .select('id')
               .single();
             if (insertError) throw insertError;
@@ -419,11 +419,11 @@ export function AdminCourseFormPage() {
             } else {
               const { data: newLesson, error: insertError } = await supabase
                 .from('course_lessons')
-                .insert([lessonPayload] as CourseLessonInsert[])
+                .insert([lessonPayload as CourseLessonInsert] as CourseLessonInsert[])
                 .select('id')
                 .single();
-            if (insertError) throw insertError;
-            currentLessonId = (newLesson as { id: string }).id;
+              if (insertError) throw insertError;
+              currentLessonId = (newLesson as { id: string }).id;
             }
 
             if (!currentLessonId) throw new Error('Lesson ID not available after save.');
@@ -457,7 +457,7 @@ export function AdminCourseFormPage() {
               } else {
                 const { error: insertError } = await supabase
                   .from('lesson_resources')
-                  .insert([resourcePayload] as LessonResourceInsert[]);
+                  .insert([resourcePayload as LessonResourceInsert] as LessonResourceInsert[]);
                 if (insertError) throw insertError;
               }
             }

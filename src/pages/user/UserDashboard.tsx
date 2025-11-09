@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserLayout } from '../../components/UserLayout';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { BookOpen, Clock, Award, AlertCircle } from 'lucide-react';
 import { EnrollmentRow, CourseRow } from '../../lib/database.types';

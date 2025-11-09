@@ -1,5 +1,5 @@
 import { Download, FileText, Link, AlertCircle } from 'lucide-react';
-import { supabase } from '../../integrations/supabase/client'; // Updated import path
+import { supabase } from '../../lib/supabase';
 import { useEffect, useState } from 'react';
 
 interface LessonResourcesProps {
