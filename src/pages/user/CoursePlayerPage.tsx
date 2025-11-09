@@ -136,7 +136,8 @@ export function CoursePlayerPage() {
 
   const findNextLesson = (currentId: string): Lesson | null => {
     let foundCurrent = false;
-    for (const section of course!.sections) {
+    if (!course) return null; // Add null check for course
+    for (const section of course.sections) {
       for (const lesson of section.course_lessons) {
         if (foundCurrent) {
           return lesson;
@@ -166,7 +167,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress').upsert<LessonProgressInsert>([upsertData]);
+      await supabase.from('lesson_progress').upsert([upsertData]);
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete

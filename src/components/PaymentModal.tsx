@@ -142,7 +142,7 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
       };
 
       // Fix Error 2: Explicitly cast insert payload
-      const { error: paymentError } = await supabase.from('payments').insert<PaymentsInsert>([paymentData]);
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData]);
 
       if (paymentError) throw paymentError;
 

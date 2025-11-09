@@ -1,9 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
-import { CheckCircle, XCircle, Eye, Clock, Search, Filter, Download, Calendar } from 'lucide-react';
-import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert, PaymentRow, CourseRow, ProfileRow } from '../../lib/database.types';
+import { CheckCircle, XCircle, Eye, Search, Filter, Download } from 'lucide-react';
+import { PaymentRow } from '../../lib/database.types';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { PaymentDetailsModal } from '../../components/admin/payments/PaymentDetailsModal';
@@ -20,7 +19,6 @@ interface CourseOption {
 }
 
 export function AdminPaymentsPage() {
-  const { user } = useAuth();
   const [allPayments, setAllPayments] = useState<PaymentWithDetails[]>([]);
   const [courseOptions, setCourseOptions] = useState<CourseOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +116,7 @@ export function AdminPaymentsPage() {
       // Filter up to the end of the selected day
       const endOfDay = new Date(endDate);
       endOfDay.setHours(23, 59, 59, 999);
-      tempPayments = tempPayments.filter(p => new Date(p.created_at) <= endOfDay);
+      tempPayments = tempPayments.filter((p) => new Date(p.created_at) <= endOfDay);
     }
     console.log('DEBUG: useMemo - final filteredPayments:', tempPayments); // Added debug log
     return tempPayments;

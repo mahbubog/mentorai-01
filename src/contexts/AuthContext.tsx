@@ -17,7 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { ReactNode }) {
         full_name: fullName,
         phone: phone,
       };
-      const { error: profileError } = await supabase.from('profiles').insert<ProfilesInsert>([profileData]);
+      const { error: profileError } = await supabase.from('profiles').insert([profileData]);
 
       if (profileError) throw profileError;
     }
