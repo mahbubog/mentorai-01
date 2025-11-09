@@ -162,7 +162,7 @@ export function AdminCoursesPage() {
     try {
       const { error } = await supabase
         .from('courses')
-        .update(updatePayload)
+        .update<CoursesUpdate>(updatePayload)
         .eq('id', id);
 
       if (error) throw error;
@@ -318,7 +318,7 @@ export function AdminCoursesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
                         {course.course_type}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900">
                         {course.course_categories_mapping
                           .map(mapping => mapping.course_categories?.name)
                           .filter(Boolean)

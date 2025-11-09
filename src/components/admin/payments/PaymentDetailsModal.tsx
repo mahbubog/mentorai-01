@@ -1,11 +1,20 @@
 import { useState } from 'react';
-import { X, CheckCircle, XCircle, Loader2, AlertCircle, User, DollarSign, FileText, Calendar, MessageSquare } from 'lucide-react';
+import { X, CheckCircle, XCircle, Loader2, AlertCircle, User, DollarSign, FileText, MessageSquare } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
-import { supabaseAdmin } from '../../../lib/supabaseAdmin';
-import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert, PaymentRow, CourseRow, ProfileRow } from '../../../lib/database.types';
+import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert } from '../../../lib/database.types';
 
 // Extend PaymentRow with course and profile details for display
-interface PaymentWithDetails extends PaymentRow {
+interface PaymentWithDetails extends PaymentsUpdate { // Changed to PaymentsUpdate for consistency with update payload
+  id: string; // Ensure ID is present for existing payments
+  user_id: string;
+  course_id: string;
+  amount: number;
+  payment_method: 'bkash' | 'nagad' | 'rocket' | 'bank_transfer' | 'other';
+  payment_number: string;
+  transaction_id: string;
+  created_at: string;
+  updated_at: string;
+  status: 'pending' | 'approved' | 'rejected';
   courses: { title: string } | null;
   profiles: { full_name: string | null; email: string; phone: string | null } | null;
 }
@@ -45,7 +54,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: updatePaymentError } = await supabase
         .from('payments')
-        .update(paymentUpdatePayload)
+        .update<PaymentsUpdate>(paymentUpdatePayload)
         .eq('id', payment.id);
 
       if (updatePaymentError) throw updatePaymentError;
@@ -60,7 +69,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: createEnrollmentError } = await supabase
         .from('enrollments')
-        .insert([enrollmentPayload] as EnrollmentsInsert[]);
+        .insert<EnrollmentsInsert>([enrollmentPayload]);
 
       if (createEnrollmentError) throw createEnrollmentError;
 
@@ -76,7 +85,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
       const newEnrolledCount = (courseData?.enrolled_count || 0) + 1;
       const { error: updateCourseCountError } = await supabase
         .from('courses')
-        .update({ enrolled_count: newEnrolledCount })
+        .update<PaymentsUpdate>({ enrolled_count: newEnrolledCount }) // Cast to PaymentsUpdate as it's a partial update
         .eq('id', payment.course_id);
 
       if (updateCourseCountError) throw updateCourseCountError;
@@ -92,7 +101,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: createNotificationError } = await supabase
         .from('notifications')
-        .insert([notificationPayload] as NotificationsInsert[]);
+        .insert<NotificationsInsert>([notificationPayload]);
 
       if (createNotificationError) console.error('Error creating notification:', createNotificationError); // Log but don't block
 
@@ -125,7 +134,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: updatePaymentError } = await supabase
         .from('payments')
-        .update(paymentUpdatePayload)
+        .update<PaymentsUpdate>(paymentUpdatePayload)
         .eq('id', payment.id);
 
       if (updatePaymentError) throw updatePaymentError;
@@ -141,7 +150,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: createNotificationError } = await supabase
         .from('notifications')
-        .insert([notificationPayload] as NotificationsInsert[]);
+        .insert<NotificationsInsert>([notificationPayload]);
 
       if (createNotificationError) console.error('Error creating notification:', createNotificationError); // Log but don't block
 

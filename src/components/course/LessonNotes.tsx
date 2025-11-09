@@ -59,7 +59,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
 
       const { data, error } = await supabase
         .from('user_notes')
-        .insert([noteData] as UserNotesInsert[])
+        .insert<UserNotesInsert>([noteData])
         .select()
         .single();
 
@@ -99,12 +99,12 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
 
       await supabase
         .from('user_notes')
-        .update(updatePayload as UserNotesUpdate)
+        .update<UserNotesUpdate>(updatePayload)
         .eq('id', noteId);
       
       // Optimistically update state
       setNotes(notes.map(n => n.id === noteId ? { ...n, note_content: newContent } : n));
-    } catch (err: any) {
+    } catch (err: any) => {
       setError('Failed to update note: ' + err.message);
     }
   };
