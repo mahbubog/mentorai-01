@@ -3,14 +3,14 @@ import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-// Removed unused CourseRow import
+import { CourseRow } from '../../../../lib/database.types'; // Added CourseRow import
 
 interface LiveCourseDetailsSectionProps {
   start_date: string | null;
   end_date: string | null;
   meeting_link: string | null;
   max_students: number | null;
-  onFieldChange: (field: keyof any, value: any) => void; // Keep as any for flexibility
+  onFieldChange: (field: keyof CourseRow, value: any) => void;
 }
 
 export function LiveCourseDetailsSection({

@@ -6,14 +6,14 @@ import { Textarea } from '../../../ui/textarea';
 // Removed unused Button import
 import { Upload, XCircle } from 'lucide-react';
 import { supabase } from '../../../../lib/supabase';
-// Removed unused InstructorRow
+import { CourseRow } from '../../../../lib/database.types'; // Added CourseRow import
 
 interface InstructorSectionProps {
   instructor_id: string | null;
   instructor_name?: string | null; // Allow null
   instructor_bio?: string | null;
   instructor_credentials?: string | null;
-  onFieldChange: (field: string, value: any) => void; // Changed to string for flexibility
+  onFieldChange: (field: keyof CourseRow | 'instructor_name' | 'instructor_bio' | 'instructor_photo' | 'instructor_credentials', value: any) => void;
 }
 
 interface InstructorOption {

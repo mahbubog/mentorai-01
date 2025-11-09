@@ -106,7 +106,7 @@ export function PersonalInformationTab() {
       };
 
       const { error: updateError } = await supabase
-        .from('profiles' as any) // FIX 2
+        .from('profiles')
         .update(updatePayload)
         .eq('id', user!.id);
       if (updateError) throw updateError;

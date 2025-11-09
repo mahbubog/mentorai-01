@@ -10,7 +10,7 @@ import { RequirementsSection } from './sections/RequirementsSection';
 import { LearningOutcomesSection } from './sections/LearningOutcomesSection';
 import { SeoSection } from './sections/SeoSection';
 import { PublishingOptionsSection } from './sections/PublishingOptionsSection';
-// Removed unused Button import
+// Removed unused import: import { CourseRow } from '../../../lib/database.types';
 
 interface CourseFormProps {
   initialData: CourseFormData;
@@ -26,9 +26,8 @@ export function CourseForm({ initialData, onSave, onCancel, isSaving }: CourseFo
     setFormData(initialData);
   }, [initialData]);
 
-  // Update field type to accept string | number | symbol to satisfy components using keyof any
-  const handleFieldChange = useCallback((field: string | number | symbol, value: any) => {
-    setFormData(prev => ({ ...prev, [field as string]: value }));
+  const handleFieldChange = useCallback((field: keyof CourseFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
   const handleSectionChange = useCallback((sections: SectionFormData[]) => {

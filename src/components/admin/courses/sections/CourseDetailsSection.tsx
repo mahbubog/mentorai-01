@@ -14,7 +14,7 @@ interface CourseDetailsSectionProps {
   price: number;
   discount_price: number | null;
   duration: string | null;
-  onFieldChange: (field: keyof any, value: any) => void;
+  onFieldChange: (field: keyof CourseRow | 'category_ids', value: any) => void;
 }
 
 interface Category {

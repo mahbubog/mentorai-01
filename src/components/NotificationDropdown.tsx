@@ -60,7 +60,7 @@ export function NotificationDropdown() {
       const updatePayload: NotificationsUpdate = { is_read: true };
       
       const { error } = await supabase
-        .from('notifications' as any) // FIX 1
+        .from('notifications')
         .update(updatePayload)
         .eq('id', id);
       
@@ -97,13 +97,13 @@ export function NotificationDropdown() {
       >
         <Bell className="h-6 w-6" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-500 text-xs text-white flex items-center justify-center">
+          <span className="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-red-500 text-xs text-white">
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-50 z-50">
           <div className="p-4 border-b flex justify-between items-center">
             <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
             <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">

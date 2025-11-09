@@ -161,7 +161,7 @@ export function AdminCoursesPage() {
 
     try {
       const { error } = await supabase
-        .from('courses' as any) // FIX 4
+        .from('courses')
         .update(updatePayload)
         .eq('id', id);
 

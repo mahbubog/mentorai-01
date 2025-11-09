@@ -38,12 +38,12 @@ export function LessonItem({ lesson, onLessonChange }: LessonItemProps) {
       ...lesson,
       resources: [
         ...lesson.resources,
-        { title: '', file_url: '', file_type: '', file: undefined },
+        { title: '', file_url: '', file_type: null, file: undefined }, // file_type can be null
       ],
     });
   }, [lesson, onLessonChange]);
 
-  const updateResource = useCallback((index: number, field: keyof any, value: any) => {
+  const updateResource = useCallback((index: number, field: keyof LessonFormData['resources'][0], value: any) => {
     const updatedResources = [...lesson.resources];
     updatedResources[index] = { ...updatedResources[index], [field]: value };
     onLessonChange({ ...lesson, resources: updatedResources });

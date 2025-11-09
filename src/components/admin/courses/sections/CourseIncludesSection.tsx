@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { Label } from '../../../ui/label';
 import { Checkbox } from '../../../ui/checkbox';
+import { CourseRow } from '../../../../lib/database.types'; // Added CourseRow import
+import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage';
 
 interface CourseIncludesSectionProps {
   includes_certificate: boolean;
@@ -8,7 +10,7 @@ interface CourseIncludesSectionProps {
   includes_resources: boolean;
   includes_mobile_access: boolean;
   includes_qa_support: boolean;
-  onFieldChange: (field: keyof any, value: any) => void;
+  onFieldChange: (field: keyof CourseFormData, value: any) => void;
 }
 
 export function CourseIncludesSection({
@@ -19,8 +21,18 @@ export function CourseIncludesSection({
   includes_qa_support,
   onFieldChange,
 }: CourseIncludesSectionProps) {
-  const handleCheckboxChange = useCallback((field: keyof CourseIncludesSectionProps, checked: boolean) => {
-    onFieldChange(field, checked);
+  const handleCheckboxChange = useCallback((field: keyof Omit<CourseIncludesSectionProps, 'onFieldChange'>, checked: boolean) => {
+    // Map local prop names to CourseRow field names
+    const courseRowFieldMap: Record<keyof Omit<CourseIncludesSectionProps, 'onFieldChange'>, keyof CourseRow> = {
+      includes_certificate: 'includes_certificate',
+      includes_lifetime_access: 'includes_lifetime_access',
+      includes_resources: 'includes_resources',
+      includes_mobile_access: 'includes_mobile_access',
+      includes_qa_support: 'includes_qa_support',
+    };
+    
+    const courseField = courseRowFieldMap[field];
+    onFieldChange(courseField, checked);
   }, [onFieldChange]);
 
   return (

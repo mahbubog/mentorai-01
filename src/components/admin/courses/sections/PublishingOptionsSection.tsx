@@ -9,7 +9,7 @@ import { CourseRow } from '../../../../lib/database.types';
 interface PublishingOptionsSectionProps {
   status: CourseRow['status'];
   is_featured: boolean;
-  onFieldChange: (field: keyof any, value: any) => void;
+  onFieldChange: (field: keyof CourseRow, value: any) => void;
   onSave: () => void;
   onPublish: () => void;
   onCancel: () => void;
