@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../integrations/supabase/client'; // Updated import path
 import { useAuth } from '../../contexts/AuthContext';
 import { Clock, Users, Award, BookOpen, CheckCircle, Star, Download, Smartphone, Lock, Calendar, Globe } from 'lucide-react';
 import { PaymentModal } from '../../components/PaymentModal';

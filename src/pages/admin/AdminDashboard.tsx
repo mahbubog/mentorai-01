@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../integrations/supabase/client'; // Updated import path
 import { Users, BookOpen, DollarSign, Clock, Activity, UserPlus, Plus, Eye, FileText } from 'lucide-react';
 import { PaymentRow, ProfileRow } from '../../lib/database.types';
 import {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle, Loader, X } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../integrations/supabase/client'; // Updated import path
 import { useAuth } from '../../contexts/AuthContext';
 
 interface ChangePasswordModalProps {

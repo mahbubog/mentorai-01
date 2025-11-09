@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '../../components/Header';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../integrations/supabase/client'; // Updated import path
 import { Search, Filter } from 'lucide-react';
 
 interface Course {
