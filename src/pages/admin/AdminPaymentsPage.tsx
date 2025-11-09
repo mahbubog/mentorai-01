@@ -10,7 +10,7 @@ import { PaymentDetailsModal } from '../../components/admin/payments/PaymentDeta
 // Extend PaymentRow with course and profile details for display
 interface PaymentWithDetails extends PaymentRow {
   courses: { title: string } | null;
-  profiles: { full_name: string | null; email: string; phone: string | null } | null;
+  profiles: { full_name: string | null; phone: string | null } | null; // Removed email from here
 }
 
 interface CourseOption {
@@ -46,7 +46,7 @@ export function AdminPaymentsPage() {
         .select(`
           *,
           courses (title),
-          profiles:user_id (full_name, email, phone)
+          profiles:user_id (full_name, phone) // Removed 'email' from profiles selection
         `)
         .order('created_at', { ascending: false });
 
@@ -54,7 +54,6 @@ export function AdminPaymentsPage() {
         console.error('Supabase Error loading payments:', paymentsError);
         throw paymentsError;
       }
-      console.log('DEBUG: Fetched paymentsData:', paymentsData); // Added debug log
       setAllPayments(paymentsData as PaymentWithDetails[] || []);
 
       // 2. Load course options for filtering
@@ -79,14 +78,11 @@ export function AdminPaymentsPage() {
 
   const filteredPayments = useMemo(() => {
     let tempPayments = allPayments;
-    console.log('DEBUG: useMemo - allPayments before filter:', tempPayments); // Added debug log
-    console.log('DEBUG: useMemo - current filterStatus:', filterStatus); // Added debug log
 
     // Status Filter
     if (filterStatus !== 'all') {
       tempPayments = tempPayments.filter(p => p.status === filterStatus);
     }
-    console.log('DEBUG: useMemo - tempPayments after status filter:', tempPayments); // Added debug log
 
     // Course Filter
     if (filterCourseId !== 'all') {
@@ -103,7 +99,6 @@ export function AdminPaymentsPage() {
       const lowerSearch = searchTerm.toLowerCase();
       tempPayments = tempPayments.filter(p => 
         p.profiles?.full_name?.toLowerCase().includes(lowerSearch) ||
-        p.profiles?.email?.toLowerCase().includes(lowerSearch) ||
         p.transaction_id.toLowerCase().includes(lowerSearch)
       );
     }
@@ -118,7 +113,6 @@ export function AdminPaymentsPage() {
       endOfDay.setHours(23, 59, 59, 999);
       tempPayments = tempPayments.filter((p) => new Date(p.created_at) <= endOfDay);
     }
-    console.log('DEBUG: useMemo - final filteredPayments:', tempPayments); // Added debug log
     return tempPayments;
   }, [allPayments, filterStatus, filterCourseId, filterMethod, searchTerm, startDate, endDate]);
 
@@ -142,7 +136,7 @@ export function AdminPaymentsPage() {
     }
 
     const headers = [
-      'Payment ID', 'User Name', 'User Email', 'User Phone', 'Course Title', 'Amount', 
+      'Payment ID', 'User Name', 'User Phone', 'Course Title', 'Amount', 
       'Payment Method', 'Payment Number', 'Transaction ID', 'Payment Screenshot', 
       'Billing Name', 'Billing Email', 'Billing Phone', 'Billing Address', 'Billing City', 
       'Billing Country', 'Status', 'Rejection Reason', 'Admin Notes', 'Approved By', 
@@ -152,7 +146,6 @@ export function AdminPaymentsPage() {
     const rows = data.map(p => [
       `"${p.id}"`,
       `"${p.profiles?.full_name || 'N/A'}"`,
-      `"${p.profiles?.email || 'N/A'}"`,
       `"${p.profiles?.phone || 'N/A'}"`,
       `"${p.courses?.title || 'N/A'}"`,
       p.amount,
@@ -355,7 +348,7 @@ export function AdminPaymentsPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <p className="font-medium">{payment.profiles?.full_name || 'N/A'}</p>
-                        <p className="text-xs text-gray-500">{payment.profiles?.email}</p>
+                        <p className="text-xs text-gray-500">{payment.billing_email}</p> {/* Use billing_email from payments table */}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {payment.courses?.title}

@@ -59,7 +59,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
 
       const { data, error } = await supabase
         .from('user_notes')
-        .insert([noteData])
+        .insert<UserNotesInsert[]>([noteData])
         .select()
         .single();
 
@@ -99,7 +99,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
 
       await supabase
         .from('user_notes')
-        .update(updatePayload)
+        .update<UserNotesUpdate>(updatePayload)
         .eq('id', noteId);
       
       // Optimistically update state

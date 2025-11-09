@@ -6,7 +6,7 @@ import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert, PaymentRow, Cou
 // Extend PaymentRow with course and profile details for display
 interface PaymentWithDetails extends PaymentRow {
   courses: { title: string } | null;
-  profiles: { full_name: string | null; email: string; phone: string | null } | null;
+  profiles: { full_name: string | null; phone: string | null } | null; // Removed email from here
 }
 
 interface PaymentDetailsModalProps {
@@ -44,7 +44,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: updatePaymentError } = await supabase
         .from('payments')
-        .update(paymentUpdatePayload)
+        .update<PaymentsUpdate>(paymentUpdatePayload)
         .eq('id', payment.id);
 
       if (updatePaymentError) throw updatePaymentError;
@@ -59,7 +59,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: createEnrollmentError } = await supabase
         .from('enrollments')
-        .insert([enrollmentPayload]);
+        .insert<EnrollmentsInsert[]>([enrollmentPayload]);
 
       if (createEnrollmentError) throw createEnrollmentError;
 
@@ -75,7 +75,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
       const newEnrolledCount = (courseData?.enrolled_count || 0) + 1;
       const { error: updateCourseCountError } = await supabase
         .from('courses')
-        .update({ enrolled_count: newEnrolledCount } as CoursesUpdate) // Cast to CoursesUpdate
+        .update<CoursesUpdate>({ enrolled_count: newEnrolledCount })
         .eq('id', payment.course_id);
 
       if (updateCourseCountError) throw updateCourseCountError;
@@ -91,7 +91,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: createNotificationError } = await supabase
         .from('notifications')
-        .insert([notificationPayload]);
+        .insert<NotificationsInsert[]>([notificationPayload]);
 
       if (createNotificationError) console.error('Error creating notification:', createNotificationError); // Log but don't block
 
@@ -124,7 +124,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: updatePaymentError } = await supabase
         .from('payments')
-        .update(paymentUpdatePayload)
+        .update<PaymentsUpdate>(paymentUpdatePayload)
         .eq('id', payment.id);
 
       if (updatePaymentError) throw updatePaymentError;
@@ -140,7 +140,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
 
       const { error: createNotificationError } = await supabase
         .from('notifications')
-        .insert([notificationPayload]);
+        .insert<NotificationsInsert[]>([notificationPayload]);
 
       if (createNotificationError) console.error('Error creating notification:', createNotificationError); // Log but don't block
 
@@ -199,7 +199,7 @@ export function PaymentDetailsModal({ payment, onClose, onActionSuccess }: Payme
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-gray-500">User Email</p>
-                <p className="font-medium text-gray-900">{payment.profiles?.email || 'N/A'}</p>
+                <p className="font-medium text-gray-900">{payment.billing_email || 'N/A'}</p> {/* Changed to billing_email */}
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-gray-500">User Phone</p>
