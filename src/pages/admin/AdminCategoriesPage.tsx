@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../integrations/supabase/client'; // Updated import path
 import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, AlertCircle, CheckCircle, Loader2, Search, XCircle } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -113,7 +113,7 @@ export function AdminCategoriesPage() {
 
       const { error: insertError } = await supabase
         .from('course_categories')
-        .insert([categoryData]);
+        .insert([categoryData] as CourseCategoryInsert[]);
 
       if (insertError) throw insertError;
 
@@ -235,7 +235,7 @@ export function AdminCategoriesPage() {
 
       const { error: updateError } = await supabase
         .from('course_categories')
-        .upsert(updates, { onConflict: 'id' });
+        .upsert(updates as CourseCategoryUpdate[], { onConflict: 'id' });
 
       if (updateError) throw updateError;
 

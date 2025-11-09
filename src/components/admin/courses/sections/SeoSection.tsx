@@ -3,11 +3,12 @@ import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
 import { CourseRow } from '../../../../lib/database.types'; // Added CourseRow import
+import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Import CourseFormData
 
 interface SeoSectionProps {
   meta_title: string;
   meta_description: string;
-  onFieldChange: (field: keyof CourseRow, value: any) => void;
+  onFieldChange: (field: keyof CourseFormData, value: any) => void; // Changed field type to keyof CourseFormData
 }
 
 export function SeoSection({

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GraduationCap, LogOut, LayoutDashboard, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { NotificationDropdown } from './NotificationDropdown';
+import { supabase } from '../integrations/supabase/client'; // Updated import path
 
 export function AdminHeader() {
   const { user, signOut } = useAuth();

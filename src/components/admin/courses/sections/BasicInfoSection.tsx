@@ -5,6 +5,7 @@ import { Textarea } from '../../../ui/textarea';
 import { Upload, XCircle } from 'lucide-react'; // Removed unused Image, Video
 import { slugify } from '../../../../utils/slugify';
 import { Button } from '../../../ui/button';
+import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Import CourseFormData
 
 interface BasicInfoSectionProps {
   title: string;
@@ -13,7 +14,7 @@ interface BasicInfoSectionProps {
   full_description: string | null; // Allow null
   thumbnail: string | null; // Allow null
   preview_video: string | null; // Allow null
-  onFieldChange: (field: string, value: any) => void; // Changed field type to string
+  onFieldChange: (field: keyof CourseFormData, value: any) => void; // Changed field type to keyof CourseFormData
 }
 
 export function BasicInfoSection({

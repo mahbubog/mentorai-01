@@ -4,13 +4,14 @@ import { Label } from '../../../ui/label';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CourseRow } from '../../../../lib/database.types'; // Added CourseRow import
+import { CourseFormData } from '../../../../pages/admin/AdminCourseFormPage'; // Import CourseFormData
 
 interface LiveCourseDetailsSectionProps {
   start_date: string | null;
   end_date: string | null;
   meeting_link: string | null;
   max_students: number | null;
-  onFieldChange: (field: keyof CourseRow, value: any) => void;
+  onFieldChange: (field: keyof CourseFormData, value: any) => void; // Changed field type to keyof CourseFormData
 }
 
 export function LiveCourseDetailsSection({

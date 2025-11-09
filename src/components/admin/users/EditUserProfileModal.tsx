@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Upload, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../integrations/supabase/client'; // Updated import path
 import { ProfilesUpdate, ProfileRow } from '../../../lib/database.types';
 
 interface EditUserProfileModalProps {
