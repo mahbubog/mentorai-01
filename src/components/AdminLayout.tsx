@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Header } from './Header';
-import { LayoutDashboard, BookOpen, CreditCard, Users, FileText, Settings, LogOut, FolderOpen, ListTree } from 'lucide-react'; // Added ListTree icon
+import { LayoutDashboard, BookOpen, CreditCard, Users, FileText, Settings, LogOut, FolderOpen, ListTree } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { AdminHeader } from './AdminHeader';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -35,7 +35,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <AdminHeader />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           <aside className="w-full md:w-64 flex-shrink-0">

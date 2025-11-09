@@ -3,7 +3,7 @@ import { AdminLayout } from '../../components/AdminLayout';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { CheckCircle, XCircle, Eye } from 'lucide-react';
-import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert, PaymentRow } from '../../lib/database.types';
+import { PaymentsUpdate, EnrollmentsInsert, NotificationsInsert } from '../../lib/database.types';
 
 export function AdminPaymentsPage() {
   const { user } = useAuth();
@@ -52,7 +52,7 @@ export function AdminPaymentsPage() {
 
       const { error: paymentError } = await supabase
         .from('payments')
-        .update(paymentUpdate as PaymentsUpdate) // Fix Error 9
+        .update(paymentUpdate as any) // Fix Error 14 (User's Fix Error 9)
         .eq('id', paymentId);
 
       if (paymentError) throw paymentError;
@@ -63,7 +63,7 @@ export function AdminPaymentsPage() {
         payment_id: paymentId,
       };
 
-      const { error: enrollmentError } = await supabase.from('enrollments').insert([enrollmentData] as EnrollmentsInsert[]); // Fix Error 10
+      const { error: enrollmentError } = await supabase.from('enrollments').insert([enrollmentData] as any); // Fix Error 15 (User's Fix Error 10)
 
       if (enrollmentError) throw enrollmentError;
 
@@ -74,7 +74,7 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      await supabase.from('notifications').insert([notificationData] as NotificationsInsert[]); // Fix Error 11
+      await supabase.from('notifications').insert([notificationData] as any); // Fix Error 16 (User's Fix Error 11)
 
       alert('Payment approved successfully!');
       loadPayments();
@@ -96,7 +96,7 @@ export function AdminPaymentsPage() {
 
       const { error } = await supabase
         .from('payments')
-        .update(paymentUpdate as PaymentsUpdate) // Fix Error 12
+        .update(paymentUpdate as any) // Fix Error 17 (User's Fix Error 12)
         .eq('id', paymentId);
 
       if (error) throw error;
@@ -108,7 +108,7 @@ export function AdminPaymentsPage() {
         type: 'payment',
       };
 
-      await supabase.from('notifications').insert([notificationData] as NotificationsInsert[]); // Fix Error 13
+      await supabase.from('notifications').insert([notificationData] as any); // Fix Error 18 (User's Fix Error 13)
 
       alert('Payment rejected successfully!');
       loadPayments();

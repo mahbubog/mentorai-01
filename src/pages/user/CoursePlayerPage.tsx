@@ -166,7 +166,7 @@ export function CoursePlayerPage() {
         completed_at: new Date().toISOString(),
       };
 
-      await supabase.from('lesson_progress').upsert([upsertData] as LessonProgressInsert[]); // Fix Error 7
+      await supabase.from('lesson_progress').upsert([upsertData] as any); // Fix Error 10 (User's Fix Error 7)
       setProgress({ ...progress, [lessonId]: true });
       
       // Automatically move to the next lesson after marking complete

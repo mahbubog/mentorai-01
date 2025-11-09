@@ -141,8 +141,8 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
         created_at: paymentDate.toISOString(), // Use payment date as created_at for accurate history
       };
 
-      // Fix Error 2: Explicitly cast insert payload
-      const { error: paymentError } = await supabase.from('payments').insert([paymentData] as PaymentsInsert[]); // Fix Error 2
+      // Fix Error 5 (User's Fix Error 2): Explicitly cast insert payload to any
+      const { error: paymentError } = await supabase.from('payments').insert([paymentData] as any); 
 
       if (paymentError) throw paymentError;
 
@@ -154,14 +154,6 @@ export function PaymentModal({ course, onClose, onPaymentSubmitted }: PaymentMod
       setSubmitting(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

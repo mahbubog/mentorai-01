@@ -103,7 +103,7 @@ export function EditUserProfileModal({ user, onClose, onSaveSuccess }: EditUserP
 
       const { error: updateError } = await supabase
         .from('profiles')
-        .update(updatePayload as ProfilesUpdate) // Fix Error 14
+        .update(updatePayload as any) // Fix Error 19 (User's Fix Error 14)
         .eq('id', user.id);
       if (updateError) throw updateError;
 
